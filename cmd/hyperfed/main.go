@@ -33,8 +33,8 @@ import (
 	"github.com/spf13/pflag"
 
 	genericapiserver "k8s.io/apiserver/pkg/server"
-	utilflag "k8s.io/apiserver/pkg/util/flag"
-	"k8s.io/apiserver/pkg/util/logs"
+	utilflag "k8s.io/component-base/cli/flag"
+	"k8s.io/component-base/logs"
 	_ "k8s.io/client-go/plugin/pkg/client/auth" // Load all client auth plugins for GCP, Azure, Openstack, etc
 
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app"

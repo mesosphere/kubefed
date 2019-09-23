@@ -21,7 +21,7 @@ import (
 	"fmt"
 	"os"
 
-	"k8s.io/apiserver/pkg/util/logs"
+	"k8s.io/component-base/logs"
 	_ "k8s.io/client-go/plugin/pkg/client/auth" // Load all client auth plugins for GCP, Azure, Openstack, etc
 
 	"sigs.k8s.io/kubefed/pkg/kubefedctl"
