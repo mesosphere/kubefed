@@ -24,9 +24,10 @@ set -o pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")/.." ; pwd)"
 
-if command -v go-bindata > /dev/null; then
+GOBIN="$(go env GOPATH)/bin"
+if command -v ${GOBIN}/go-bindata > /dev/null; then
   cd "${ROOT_DIR}"
-  "go-bindata" \
+  "${GOBIN}/go-bindata" \
     -nocompress \
     -nometadata \
     -pkg 'common' \
@@ -41,4 +42,3 @@ else
   echo "go-bindata is not found. Use './scripts/download-binaries.sh' to download it."
   exit 1
 fi
-

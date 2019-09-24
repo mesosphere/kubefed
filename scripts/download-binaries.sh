@@ -41,9 +41,10 @@ root_dir="$(cd "$(dirname "$0")/.." ; pwd)"
 dest_dir="${root_dir}/bin"
 mkdir -p "${dest_dir}"
 
+echo ${dest_dir}
 platform=$(uname -s|tr A-Z a-z)
 
-kb_version="1.0.8"
+kb_version="2.0.0"
 kb_tgz="kubebuilder_${kb_version}_${platform}_amd64.tar.gz"
 kb_url="https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${kb_version}/${kb_tgz}"
 curl "${curl_args}O" "${kb_url}" \
@@ -69,13 +70,11 @@ curl "${curl_args}O" "${golint_url}" \
 
 # Install go-bindata tool
 GOBIN="$(go env GOPATH)/bin"
+GOPATH=$(go env GOPATH)
 gobindata_version="v3.1.2"
+go get -u github.com/go-bindata/go-bindata@${gobindata_version}
 go get -d github.com/go-bindata/go-bindata/...
-pushd ${GOPATH}/src/github.com/go-bindata/go-bindata
-git checkout ${gobindata_version}
-go install github.com/go-bindata/go-bindata/...
-ln -s ${GOBIN}/go-bindata ${dest_dir}/go-bindata
-popd
+ln -sfn ${GOBIN}/go-bindata ${dest_dir}/go-bindata
 
 
 echo    "# destination:"

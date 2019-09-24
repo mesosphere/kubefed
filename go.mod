@@ -22,9 +22,10 @@ require (
 	github.com/grpc-ecosystem/go-grpc-prometheus v1.2.0 // indirect
 	github.com/grpc-ecosystem/grpc-gateway v1.5.0 // indirect
 	github.com/json-iterator/go v1.1.7
+	github.com/munnerz/goautoneg v0.0.0-20190414153302-2ae31c8b6b30 // indirect
 	github.com/onsi/ginkgo v1.8.0
 	github.com/onsi/gomega v1.5.0
-	github.com/openshift/generic-admission-server v1.13.2
+	github.com/openshift/generic-admission-server v1.14.0
 	github.com/pborman/uuid v1.2.0
 	github.com/pkg/errors v0.8.1
 	github.com/prometheus/client_model v0.0.0-20190129233127-fd36f4220a90 // indirect
@@ -52,15 +53,19 @@ require (
 	k8s.io/kubectl v0.0.0-20190921001814-0e9f77c7d7c6
 	sigs.k8s.io/controller-runtime v0.2.2
 	sigs.k8s.io/controller-tools v0.2.1
+	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e
 	sigs.k8s.io/yaml v1.1.0
 )
 
 replace (
 	git.apache.org/thrift.git => github.com/apache/thrift v0.0.0-20180902110319-2566ecd5d999
 	github.com/Sirupsen/logrus => github.com/sirupsen/logrus v1.4.1
+	github.com/openshift/generic-admission-server => github.com/openshift/generic-admission-server v1.14.0
 	k8s.io/api => k8s.io/api v0.0.0-20190409021203-6e4e0e4f393b
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20190409022649-727a075fdec8
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20190404173353-6a84e37a896d
 	k8s.io/apiserver => k8s.io/apiserver v0.0.0-20190918223255-26459790ef01
 	k8s.io/code-generator => k8s.io/code-generator v0.0.0-20190912042602-ebc0eb3a5c23
+	k8s.io/kube-openapi => k8s.io/kube-openapi v0.0.0-20190228160746-b3a7cee44a30
+	sigs.k8s.io/structured-merge-diff => sigs.k8s.io/structured-merge-diff v0.0.0-20190302045857-e85c7b244fd2
 )
