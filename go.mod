@@ -53,7 +53,7 @@ require (
 	k8s.io/kubectl v0.0.0-20190921001814-0e9f77c7d7c6
 	sigs.k8s.io/controller-runtime v0.2.2
 	sigs.k8s.io/controller-tools v0.2.1
-	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e
+	sigs.k8s.io/structured-merge-diff v0.0.0-20190525122527-15d366b2352e // indirect
 	sigs.k8s.io/yaml v1.1.0
 )
 
