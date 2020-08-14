@@ -40,7 +40,7 @@ resources. For instance, if you federated a deployment the federated status shou
 report if the deployment failed or error at any time.
 
 A federated resource only reflects the status of propagation actions, but it doesn't
-reflect the status if whether the resource is running or failed.
+reflect the status of whether the resource is running or failed.
 
 ## Motivation
 
@@ -60,8 +60,11 @@ Addition of feature flags to control plane components to limit or throttle reque
 
 ## Proposal
 
-Kubefed reports a limited set of states related to the state of the federation of resources themselves.
+Kubefed reports a limited set of states related to the state of the federation
+of resources themselves. This proposal aims to enrich the federated resource
+status by adding the conditions and an extra field to the federated resource status.
 
+### Conditions
 
 ```go
 ClusterPropagationOK PropagationStatus = ""
@@ -382,6 +385,126 @@ This can have an impact in the performance, so this should be configured with pr
 To do so, the system exposes properties as part of each `FederatedTypeConfig` to define
 the desired behavior at federated resource type.
 
+### User customizable field
+
+Extend the `FederatedTypeConfig` with an extra field, named `statusPath`, that contains a JSON path to the field of the `FederatedTypeConfig.spec.targetType` that should be rolled up to the federated resource.
+
+```go
+// FederatedTypeConfigSpec defines the desired state of FederatedTypeConfig.
+type FederatedTypeConfigSpec struct {
+  // The configuration of the target type. If not set, the pluralName and
+  // groupName fields will be set from the metadata.name of this resource. The
+  // kind field must be set.
+  TargetType APIResource `json:"targetType"`
+  // Whether or not propagation to member clusters should be enabled.
+  Propagation PropagationMode `json:"propagation"`
+  // Configuration for the federated type that defines (via
+  // template, placement and overrides fields) how the target type
+  // should appear in multiple cluster.
+  FederatedType APIResource `json:"federatedType"`
+  // Configuration for the status type that holds information about which type
+  // holds the status of the federated resource. If not provided, the group
+  // and version will default to those provided for the federated type api
+  // resource.
+  // +optional
+  StatusType *APIResource `json:"statusType,omitempty"`
+  // Whether or not Status object should be populated.
+  // +optional
+  StatusCollection *StatusCollectionMode `json:"statusCollection,omitempty"`
+
+  // A JSON path to the field in the TargetType that should be rolled up to
+  // the management cluster.
+  // +optional
+  StatusPath string `json:"statusPath,omitempty"`
+}
+```
+
+If `StatusCollection` is not `Enabled` then the status of the federated resource
+should not be rolled up back to the management cluster.
+
+An example to rollup the number of replicas of a `Deployment`:
+
+```yaml
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedTypeConfig
+spec:
+  federatedType:
+    group: types.kubefed.io
+    kind: FederatedDeployment
+    pluralName: federateddeployments
+    scope: Namespaced
+    version: v1beta1
+  propagation: Enabled
+  targetType:
+    group: apps
+    kind: Deployment
+    pluralName: deployments
+    scope: Namespaced
+    version: v1
+  #
+  # statusPath is a JSON path to the field of the targetType that should be
+  # rolled up to the management cluster. In this example we want to roll up
+  # the deployed replicas.
+  #
+  statusPath: ".status.replicas"
+```
+
+In this proposal, the value will be stored in a new field, named `statusRemote`, in `GenericClusterStatus`.
+
+
+```go
+
+type GenericFederatedStatus struct {
+  	ObservedGeneration  int64                  `json:"observedGeneration,omitempty"`
+  	Conditions          []*GenericCondition    `json:"conditions,omitempty"`
+  	Clusters            []GenericClusterStatus `json:"clusters,omitempty"`
+}
+
+type GenericFederatedResource struct {
+	metav1.TypeMeta                `json:",inline"`
+	metav1.ObjectMeta              `json:"metadata,omitempty"`
+
+	Status *GenericFederatedStatus `json:"status,omitempty"`
+}
+
+type GenericClusterStatus struct {
+	Name   string            `json:"name"`
+	Status PropagationStatus `json:"status,omitempty"`
+
+  Conditions []*metav1.Condition `json:"conditions,omitempty"`
+  StatusRemote string `json:"statusRemote,omitempty"`
+}
+
+```
+
+Example of how the FederatedDeployment can look like:
+
+```yaml
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedDeployment
+metadata:
+  <...snip...>
+spec:
+  <...snip...>
+status:
+  clusters:
+  - name: "cluster3"
+    status: "CreationFailed"
+    #
+    # the value of the JSON path of the corresponding deployment in cluster-3
+    #
+    statusRemote: "0"
+  conditions:
+  - lastTransitionTime: "2020-05-25T20:23:59Z"
+    lastUpdateTime: "2020-05-25T20:23:59Z"
+    status: "False"
+    type: "Propagation"
+```
+
+#### Updating federated resource status
+
+Kubefed already has [code](https://github.com/kubernetes-sigs/kubefed/blob/79cb7e20d3d388ee8a5c12e3ed7cdd51a8b14b99/pkg/controller/status/controller.go#L143) to cache the status of resources in the member clusters. We can extend it to update the `statusRemote` field in the federated resource when the reconcile loop is called.
+
 ### User Stories
 
 #### Story 1
@@ -440,7 +563,7 @@ status:
   - lastTransitionTime: "2020-05-25T19:47:59Z"
     lastUpdateTime: "2020-05-25T19:47:59Z"
     status: "True"
-    type: Propagation        
+    type: Propagation
 ```
 
 At any specific time, this `FederatedAddon` crashed on three clusters.
