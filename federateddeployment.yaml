@@ -1,0 +1,25 @@
+apiVersion: types.kubefed.io/v1beta1
+kind: FederatedDeployment
+metadata:
+  name: test-deployment
+  namespace: example-federated-namespace
+spec:
+  placement:
+    clusterSelector: {}
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      replicas: 1
+      selector:
+        matchLabels:
+          app: nginx
+      template:
+        metadata:
+          labels:
+            app: nginx
+        spec:
+          containers:
+          - image: nginx
+            name: nginx

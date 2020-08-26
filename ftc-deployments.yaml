@@ -1,0 +1,26 @@
+apiVersion: core.kubefed.io/v1beta1
+kind: FederatedTypeConfig
+metadata:
+  name: deployments.apps
+  namespace: default
+spec:
+  federatedType:
+    group: types.kubefed.io
+    kind: FederatedDeployment
+    pluralName: federateddeployments
+    scope: Namespaced
+    version: v1beta1
+  propagation: Enabled
+  targetType:
+    group: apps
+    kind: Deployment
+    pluralName: deployments
+    scope: Namespaced
+    version: v1
+  statusCollection: Enabled
+  statusType:
+    group: type.kubefed.io
+    kind: FederatedServiceStatus
+    pluralName: federatedservicestatuses
+    scope: Namespaced
+    version: v1beta1
