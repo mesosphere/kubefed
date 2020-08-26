@@ -81,8 +81,8 @@ func ValidateFederatedAPIResource(fedType *v1beta1.APIResource, fldPath *field.P
 
 	if len(fedType.Group) == 0 {
 		allErrs = append(allErrs, field.Required(fldPath.Child("group"), ""))
-	} else if len(strings.Split(fedType.Group, ".")) < 2 {
-		allErrs = append(allErrs, field.Invalid(fldPath.Child("group"), fedType.Group, domainWithAtLeastOneDot))
+	} else if errs := valutil.IsDNS1123Subdomain(fedType.Group); len(errs) > 0 {
+		allErrs = append(allErrs, field.Invalid(fldPath.Child("group"), fedType.Group, strings.Join(errs, ",")))
 	}
 
 	allErrs = append(allErrs, ValidateAPIResource(fedType, fldPath)...)
