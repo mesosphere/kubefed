@@ -397,7 +397,7 @@ spec:
   - name: PushReconciler
     configuration: "Enabled"
   - name: RawResourceStatusCollection
-    configuration: "Enabled"
+    configuration: "Disabled"
   - name: SchedulerPreferences
     configuration: "Enabled"
   - name: CrossClusterServiceDiscovery
