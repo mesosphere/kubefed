@@ -75,5 +75,5 @@ var DefaultKubeFedFeatureGates = map[featuregate.Feature]featuregate.FeatureSpec
 	PushReconciler:               {Default: true, PreRelease: featuregate.Beta},
 	CrossClusterServiceDiscovery: {Default: false, PreRelease: featuregate.Alpha},
 	FederatedIngress:             {Default: true, PreRelease: featuregate.Alpha},
-	RawResourceStatusCollection:  {Default: true, PreRelease: featuregate.Beta},
+	RawResourceStatusCollection:  {Default: false, PreRelease: featuregate.Beta},
 }
