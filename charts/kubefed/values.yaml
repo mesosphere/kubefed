@@ -25,7 +25,8 @@ controllermanager:
     SchedulerPreferences:
     CrossClusterServiceDiscovery:
     FederatedIngress:
-  
+    RawResourceStatusCollection:
+
   controller:
     annotations: {}
     replicaCount: 2
