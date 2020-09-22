@@ -65,7 +65,7 @@ func TestGenericPropagationStatusUpdateChanged(t *testing.T) {
 	}
 	for testName, tc := range testCases {
 		t.Run(testName, func(t *testing.T) {
-			propStatus := &GenericFederatedStatus{
+			fedStatus := &GenericFederatedStatus{
 				Clusters: []GenericClusterStatus{
 					{
 						Name: "cluster1",
@@ -86,7 +86,7 @@ func TestGenericPropagationStatusUpdateChanged(t *testing.T) {
 				StatusMap:        tc.resourceStatusMap,
 				ResourcesUpdated: tc.resourcesUpdated,
 			}
-			changed := propStatus.update(tc.generation, tc.reason, collectedStatus, collectedResourceStatus)
+			changed := fedStatus.update(tc.generation, tc.reason, collectedStatus, collectedResourceStatus, true)
 			if tc.expectedChanged != changed {
 				t.Fatalf("Expected changed to be %v, got %v", tc.expectedChanged, changed)
 			}
