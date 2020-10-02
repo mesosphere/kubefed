@@ -19,6 +19,7 @@ package e2e
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
@@ -97,6 +98,13 @@ var _ = Describe("Default", func() {
 					},
 					Scope: apiextv1b1.ClusterScoped, // Required
 				},
+			}
+			if os.Getenv("E2E_TEST_REMOTE_STATUS") != "" {
+				tl.Logf("Enabling %v feature!", features.RawResourceStatusCollection)
+				defaultKubeFedConfig.Spec.FeatureGates = append(defaultKubeFedConfig.Spec.FeatureGates, v1beta1.FeatureGatesConfig{
+					Name:          string(features.RawResourceStatusCollection),
+					Configuration: v1beta1.ConfigurationEnabled,
+				})
 			}
 		}
 
