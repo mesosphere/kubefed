@@ -171,6 +171,11 @@ spec:
     name: {{ .Release.Name }}-ca-issuer
   commonName: "ca.webhook.kubefed"
   isCA: true
+  subject:
+    organizations:
+    - cert-manager
+  dnsNames:
+  - ca.webhook.kubefed
 ---
 # Create an Issuer that uses the above generated CA certificate to issue certs
 apiVersion: cert-manager.io/v1
