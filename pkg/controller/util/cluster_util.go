@@ -20,6 +20,7 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
+	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -44,6 +45,7 @@ const (
 	KubeAPIQPS   = 20.0
 	KubeAPIBurst = 30
 	TokenKey     = "token"
+	ProxyURLKey  = "proxy-url"
 
 	KubeFedConfigName = "kubefed"
 )
@@ -84,6 +86,16 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	clusterConfig.QPS = KubeAPIQPS
 	clusterConfig.Burst = KubeAPIBurst
 
+	proxyURL, proxyURLFound := secret.Data[ProxyURLKey]
+	if proxyURLFound {
+		klog.Infof("Cluster %s  has a secret that contains a proxy-url %s", fedCluster.Name, string(proxyURL))
+		url, err := parseProxyURL(string(proxyURL))
+		if err != nil {
+			return nil, errors.Errorf("The secret for cluster %s has an invalid proxy-url value %q", clusterName, ProxyURLKey)
+		}
+		clusterConfig.Proxy = http.ProxyURL(url)
+	}
+
 	if len(fedCluster.Spec.DisabledTLSValidations) != 0 {
 		klog.V(1).Infof("Cluster %s will use a custom transport for TLS certificate validation", fedCluster.Name)
 		if err = CustomizeTLSTransport(fedCluster, clusterConfig); err != nil {
@@ -92,6 +104,20 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	}
 
 	return clusterConfig, nil
+}
+
+func parseProxyURL(proxyURL string) (*url.URL, error) {
+	u, err := url.Parse(proxyURL)
+	if err != nil {
+		return nil, fmt.Errorf("could not parse: %v", proxyURL)
+	}
+
+	switch u.Scheme {
+	case "http", "https", "socks5":
+	default:
+		return nil, fmt.Errorf("unsupported scheme %q, must be http, https, or socks5", u.Scheme)
+	}
+	return u, nil
 }
 
 // IsPrimaryCluster checks if the caller is working with objects for the
