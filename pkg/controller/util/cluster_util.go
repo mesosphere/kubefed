@@ -86,14 +86,12 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	clusterConfig.QPS = KubeAPIQPS
 	clusterConfig.Burst = KubeAPIBurst
 
-	proxyURL, proxyURLFound := secret.Data[ProxyURLKey]
-	if proxyURLFound {
-		klog.Infof("Cluster %s  has a secret that contains a proxy-url %s", fedCluster.Name, string(proxyURL))
-		url, err := parseProxyURL(string(proxyURL))
+	if fedCluster.Spec.ProxyURL != "" {
+		proxyURL, err := parseProxyURL(fedCluster.Spec.ProxyURL)
 		if err != nil {
-			return nil, errors.Errorf("The secret for cluster %s has an invalid proxy-url value %q", clusterName, ProxyURLKey)
+			return nil, errors.Errorf("Failed to parse provided proxy-url %s: %w", fedCluster.Spec.ProxyURL, err)
 		}
-		clusterConfig.Proxy = http.ProxyURL(url)
+		clusterConfig.Proxy = http.ProxyURL(proxyURL)
 	}
 
 	if len(fedCluster.Spec.DisabledTLSValidations) != 0 {
