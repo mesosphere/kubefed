@@ -20,7 +20,6 @@ import (
 	"context"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"net"
 	"net/http"
 	"net/url"
@@ -87,9 +86,9 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	clusterConfig.Burst = KubeAPIBurst
 
 	if fedCluster.Spec.ProxyURL != "" {
-		proxyURL, err := parseProxyURL(fedCluster.Spec.ProxyURL)
+		proxyURL, err := url.Parse(fedCluster.Spec.ProxyURL)
 		if err != nil {
-			return nil, errors.Errorf("Failed to parse provided proxy-url %s: %w", fedCluster.Spec.ProxyURL, err)
+			return nil, errors.Errorf("Failed to parse provided proxy-url %s: %v", fedCluster.Spec.ProxyURL, err)
 		}
 		clusterConfig.Proxy = http.ProxyURL(proxyURL)
 	}
@@ -102,20 +101,6 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	}
 
 	return clusterConfig, nil
-}
-
-func parseProxyURL(proxyURL string) (*url.URL, error) {
-	u, err := url.Parse(proxyURL)
-	if err != nil {
-		return nil, fmt.Errorf("could not parse: %v", proxyURL)
-	}
-
-	switch u.Scheme {
-	case "http", "https", "socks5":
-	default:
-		return nil, fmt.Errorf("unsupported scheme %q, must be http, https, or socks5", u.Scheme)
-	}
-	return u, nil
 }
 
 // IsPrimaryCluster checks if the caller is working with objects for the
