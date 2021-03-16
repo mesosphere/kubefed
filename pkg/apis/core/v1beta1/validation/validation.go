@@ -18,12 +18,13 @@ package validation
 
 import (
 	"fmt"
+	"net/url"
 	"strconv"
 	"strings"
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apimachineryval "k8s.io/apimachinery/pkg/api/validation"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
@@ -120,7 +121,7 @@ func ValidateAPIResource(obj *v1beta1.APIResource, fldPath *field.Path) field.Er
 		allErrs = append(allErrs, field.Invalid(fldPath.Child("pluralName"), obj.PluralName, strings.Join(errs, ",")))
 	}
 
-	allErrs = append(allErrs, validateEnumStrings(fldPath.Child("scope"), string(obj.Scope), []string{string(apiextv1b1.ClusterScoped), string(apiextv1b1.NamespaceScoped)})...)
+	allErrs = append(allErrs, validateEnumStrings(fldPath.Child("scope"), string(obj.Scope), []string{string(apiextv1.ClusterScoped), string(apiextv1.NamespaceScoped)})...)
 
 	return allErrs
 }
@@ -163,6 +164,9 @@ func validateKubeFedClusterSpec(spec *v1beta1.KubeFedClusterSpec, path *field.Pa
 	allErrs := validateAPIEndpoint(spec.APIEndpoint, path.Child("apiEndpoint"))
 	allErrs = append(allErrs, validateLocalSecretReference(&spec.SecretRef, path.Child("secretRef"))...)
 	allErrs = append(allErrs, validateDisabledTLSValidations(spec.DisabledTLSValidations, path.Child("disabledTLSValidations"))...)
+	if spec.ProxyURL != "" {
+		allErrs = append(allErrs, validateProxyURL(spec.ProxyURL, path.Child("proxyURL"))...)
+	}
 	return allErrs
 }
 
@@ -171,6 +175,21 @@ func validateKubeFedClusterStatus(status *v1beta1.KubeFedClusterStatus, path *fi
 
 	for i, condition := range status.Conditions {
 		allErrs = append(allErrs, validateClusterCondition(&condition, path.Child("conditions").Index(i))...)
+	}
+	return allErrs
+}
+
+func validateProxyURL(proxyURL string, path *field.Path) field.ErrorList {
+	var allErrs field.ErrorList
+
+	u, err := url.Parse(proxyURL)
+	if err != nil {
+		allErrs = append(allErrs, field.Invalid(path, proxyURL, "error parsing the proxy URL"))
+	}
+	switch u.Scheme {
+	case "http", "https", "socks5":
+	default:
+		allErrs = append(allErrs, field.Invalid(path, proxyURL, "proxy URL scheme must be one of: [http, https, socks5]"))
 	}
 	return allErrs
 }
@@ -252,7 +271,7 @@ func ValidateKubeFedConfig(kubeFedConfig, oldKubeFedConfig *v1beta1.KubeFedConfi
 	spec := kubeFedConfig.Spec
 	specPath := field.NewPath("spec")
 	allErrs = append(allErrs, validateEnumStrings(specPath.Child("scope"), string(spec.Scope),
-		[]string{string(apiextv1b1.ClusterScoped), string(apiextv1b1.NamespaceScoped)})...)
+		[]string{string(apiextv1.ClusterScoped), string(apiextv1.NamespaceScoped)})...)
 
 	if oldKubeFedConfig != nil {
 		// We are validating a KubeFedConfig update.
@@ -310,8 +329,7 @@ func ValidateKubeFedConfig(kubeFedConfig, oldKubeFedConfig *v1beta1.KubeFedConfi
 			existingNames[gate.Name] = true
 
 			allErrs = append(allErrs, validateEnumStrings(gatesPath.Child("name"), string(gate.Name),
-				[]string{string(features.PushReconciler), string(features.SchedulerPreferences),
-					string(features.CrossClusterServiceDiscovery), string(features.FederatedIngress)})...)
+				[]string{string(features.PushReconciler), string(features.CrossClusterServiceDiscovery), string(features.FederatedIngress), string(features.SchedulerPreferences)})...)
 
 			allErrs = append(allErrs, validateEnumStrings(gatesPath.Child("configuration"), string(gate.Configuration),
 				[]string{string(v1beta1.ConfigurationEnabled), string(v1beta1.ConfigurationDisabled)})...)

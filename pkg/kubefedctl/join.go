@@ -20,6 +20,7 @@ import (
 	"context"
 	goerrors "errors"
 	"io"
+	"net/http"
 	"reflect"
 	"strings"
 	"time"
@@ -30,13 +31,13 @@ import (
 	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
-	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 	genericclient "sigs.k8s.io/kubefed/pkg/client/generic"
@@ -93,7 +94,7 @@ type joinFederation struct {
 
 type joinFederationOptions struct {
 	secretName      string
-	scope           apiextv1b1.ResourceScope
+	scope           apiextv1.ResourceScope
 	errorOnExisting bool
 }
 
@@ -206,7 +207,7 @@ func (j *joinFederation) Run(cmdOut io.Writer, config util.FedConfig) error {
 // host cluster.
 func JoinCluster(hostConfig, clusterConfig *rest.Config, kubefedNamespace,
 	hostClusterName, joiningClusterName, secretName string,
-	scope apiextv1b1.ResourceScope, dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
+	scope apiextv1.ResourceScope, dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
 	return joinClusterForNamespace(hostConfig, clusterConfig, kubefedNamespace,
 		kubefedNamespace, hostClusterName, joiningClusterName, secretName,
 		scope, dryRun, errorOnExisting)
@@ -217,7 +218,7 @@ func JoinCluster(hostConfig, clusterConfig *rest.Config, kubefedNamespace,
 // the joiningNamespace parameter.
 func joinClusterForNamespace(hostConfig, clusterConfig *rest.Config, kubefedNamespace,
 	joiningNamespace, hostClusterName, joiningClusterName, secretName string,
-	scope apiextv1b1.ResourceScope, dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
+	scope apiextv1.ResourceScope, dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
 	start := time.Now()
 
 	hostClientset, err := util.HostClientset(hostConfig)
@@ -272,8 +273,28 @@ func joinClusterForNamespace(hostConfig, clusterConfig *rest.Config, kubefedName
 		disabledTLSValidations = append(disabledTLSValidations, fedv1b1.TLSAll)
 	}
 
+	if clusterConfig.CAData != nil {
+		caBundle = clusterConfig.CAData
+	}
+
+	var proxyURL string
+	if clusterConfig.Proxy != nil {
+		req, err := http.NewRequest("", clusterConfig.Host, nil)
+		if err != nil {
+			return nil, errors.Errorf("failed to create proxy URL request for kubefed cluster: %v", err)
+		}
+		url, err := clusterConfig.Proxy(req)
+		if err != nil {
+			klog.V(2).Infof("Error getting proxy URL for host %s: %v", clusterConfig.Host, err)
+			return nil,  errors.Errorf("failed to create proxy URL request for kubefed cluster: %v", err)
+		}
+		if url != nil {
+			proxyURL = url.String()
+		}
+	}
+
 	kubefedCluster, err := createKubeFedCluster(client, joiningClusterName, clusterConfig.Host,
-		secret.Name, kubefedNamespace, caBundle, disabledTLSValidations, dryRun, errorOnExisting)
+		secret.Name, kubefedNamespace, caBundle, disabledTLSValidations, proxyURL, dryRun, errorOnExisting)
 	if err != nil {
 		klog.V(2).Infof("Failed to create federated cluster resource: %v", err)
 		return nil, err
@@ -315,7 +336,7 @@ func performPreflightChecks(clusterClientset kubeclient.Interface, name, hostClu
 // the cluster and secret.
 func createKubeFedCluster(client genericclient.Client, joiningClusterName, apiEndpoint,
 	secretName, kubefedNamespace string, caBundle []byte, disabledTLSValidations []fedv1b1.TLSValidation,
-	dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
+	proxyURL string, dryRun, errorOnExisting bool) (*fedv1b1.KubeFedCluster, error) {
 	fedCluster := &fedv1b1.KubeFedCluster{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: kubefedNamespace,
@@ -328,6 +349,7 @@ func createKubeFedCluster(client genericclient.Client, joiningClusterName, apiEn
 				Name: secretName,
 			},
 			DisabledTLSValidations: disabledTLSValidations,
+			ProxyURL:               proxyURL,
 		},
 	}
 
@@ -404,7 +426,7 @@ func createKubeFedNamespace(clusterClientset kubeclient.Interface, kubefedNamesp
 // account is returned on success.
 func createAuthorizedServiceAccount(joiningClusterClientset kubeclient.Interface,
 	namespace, joiningClusterName, hostClusterName string,
-	scope apiextv1b1.ResourceScope, dryRun, errorOnExisting bool) (string, error) {
+	scope apiextv1.ResourceScope, dryRun, errorOnExisting bool) (string, error) {
 	klog.V(2).Infof("Creating service account in joining cluster: %s", joiningClusterName)
 
 	saName, err := createServiceAccount(joiningClusterClientset, namespace,
@@ -417,7 +439,7 @@ func createAuthorizedServiceAccount(joiningClusterClientset kubeclient.Interface
 
 	klog.V(2).Infof("Created service account: %s in joining cluster: %s", saName, joiningClusterName)
 
-	if scope == apiextv1b1.NamespaceScoped {
+	if scope == apiextv1.NamespaceScoped {
 		klog.V(2).Infof("Creating role and binding for service account: %s in joining cluster: %s", saName, joiningClusterName)
 
 		err = createRoleAndBinding(joiningClusterClientset, saName, namespace, joiningClusterName, dryRun, errorOnExisting)

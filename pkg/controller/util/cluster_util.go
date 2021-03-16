@@ -32,7 +32,7 @@ import (
 	restclient "k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/client-go/transport"
-	"k8s.io/klog"
+	"k8s.io/klog/v2"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
 	"sigs.k8s.io/kubefed/pkg/client/generic"
@@ -83,6 +83,14 @@ func BuildClusterConfig(fedCluster *fedv1b1.KubeFedCluster, client generic.Clien
 	clusterConfig.BearerToken = string(token)
 	clusterConfig.QPS = KubeAPIQPS
 	clusterConfig.Burst = KubeAPIBurst
+
+	if fedCluster.Spec.ProxyURL != "" {
+		proxyURL, err := url.Parse(fedCluster.Spec.ProxyURL)
+		if err != nil {
+			return nil, errors.Errorf("Failed to parse provided proxy URL %s: %v", fedCluster.Spec.ProxyURL, err)
+		}
+		clusterConfig.Proxy = http.ProxyURL(proxyURL)
+	}
 
 	if len(fedCluster.Spec.DisabledTLSValidations) != 0 {
 		klog.V(1).Infof("Cluster %s will use a custom transport for TLS certificate validation", fedCluster.Name)

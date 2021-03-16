@@ -23,7 +23,7 @@ import (
 	"time"
 
 	corev1 "k8s.io/api/core/v1"
-	apiextv1b1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 
@@ -480,6 +480,56 @@ func TestValidateAPIEndpoint(t *testing.T) {
 	}
 }
 
+func TestProxyURL(t *testing.T) {
+	tests := []struct {
+		proxyURL       string
+		expectedErrMsg string
+	}{
+		{
+			proxyURL: "socks5://example.com",
+		},
+		{
+			proxyURL: "https://example.com",
+		},
+		{
+			proxyURL: "http://example.com",
+		},
+		{
+			proxyURL:       "socks6://example.com",
+			expectedErrMsg: "proxyURL: Invalid value: \"socks6://example.com\": proxy URL scheme must be one of: [http, https, socks5]",
+		},
+		{
+			proxyURL:       "example.com",
+			expectedErrMsg: "proxyURL: Invalid value: \"example.com\": proxy URL scheme must be one of: [http, https, socks5]",
+		},
+		{
+			proxyURL:       "chewbacca@example.com",
+			expectedErrMsg: "proxyURL: Invalid value: \"chewbacca@example.com\": proxy URL scheme must be one of: [http, https, socks5]",
+		},
+	}
+
+	for _, test := range tests {
+		errs := validateProxyURL(test.proxyURL, field.NewPath("proxyURL"))
+		if len(errs) == 0 && test.expectedErrMsg == "" {
+			continue
+		}
+		if len(errs) == 0 && test.expectedErrMsg != "" {
+			t.Errorf("[%s] expected failure", test.expectedErrMsg)
+		} else {
+			matchedErr := false
+			for _, err := range errs {
+				if strings.Contains(err.Error(), test.expectedErrMsg) {
+					matchedErr = true
+					break
+				}
+			}
+			if !matchedErr {
+				t.Errorf("unexpected error: %v, expected: %q", errs, test.expectedErrMsg)
+			}
+		}
+	}
+}
+
 func TestValidateLocalSecretReference(t *testing.T) {
 	testCases := []struct {
 		secretName     string
@@ -659,7 +709,7 @@ func TestValidateKubeFedConfig(t *testing.T) {
 	errorCases["spec.scope: Unsupported value"] = invalidScope
 
 	immutableScope := testcommon.ValidKubeFedConfig()
-	immutableScope.Spec.Scope = apiextv1b1.NamespaceScoped
+	immutableScope.Spec.Scope = apiextv1.NamespaceScoped
 	errorCases[`spec.scope: Invalid value: "Namespaced": field is immutable`] = immutableScope
 
 	invalidControllerDurationNil := testcommon.ValidKubeFedConfig()
