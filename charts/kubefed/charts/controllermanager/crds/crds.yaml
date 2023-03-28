@@ -1,5 +1,4 @@
 
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -73,13 +72,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -121,13 +113,13 @@ spec:
                           the current state of this API Resource. --- This struct
                           is intended for direct use as an array at the field path
                           .status.conditions.  For example, type FooStatus struct{
-                          \    // Represents the observations of a foo's current state.
-                          \    // Known .status.conditions.type are: \"Available\",
-                          \"Progressing\", and \"Degraded\"     // +patchMergeKey=type
-                          \    // +patchStrategy=merge     // +listType=map     //
-                          +listMapKey=type     Conditions []metav1.Condition `json:\"conditions,omitempty\"
-                          patchStrategy:\"merge\" patchMergeKey:\"type\" protobuf:\"bytes,1,rep,name=conditions\"`
-                          \n     // other fields }"
+                          // Represents the observations of a foo's current state.
+                          // Known .status.conditions.type are: \"Available\", \"Progressing\",
+                          and \"Degraded\" // +patchMergeKey=type // +patchStrategy=merge
+                          // +listType=map // +listMapKey=type Conditions []metav1.Condition
+                          `json:\"conditions,omitempty\" patchStrategy:\"merge\" patchMergeKey:\"type\"
+                          protobuf:\"bytes,1,rep,name=conditions\"` \n // other fields
+                          }"
                         properties:
                           lastTransitionTime:
                             description: lastTransitionTime is the last time the condition
@@ -223,9 +215,9 @@ spec:
                                         with the service port The format of the error
                                         shall comply with the following rules: - built-in
                                         error values shall be specified in this file
-                                        and those shall use   CamelCase names - cloud
+                                        and those shall use CamelCase names - cloud
                                         provider specific error values must have names
-                                        that comply with the   format foo.example.com/CamelCase.
+                                        that comply with the format foo.example.com/CamelCase.
                                         --- The regex it matches is (dns1123SubdomainFmt/)?(qualifiedNameFmt)'
                                       maxLength: 316
                                       pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
@@ -266,13 +258,6 @@ spec:
         type: object
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -298,8 +283,8 @@ spec:
           target type, there is a corresponding FederatedType that has the following
           fields: \n - The \"template\" field specifies the basic definition of a
           federated resource - The \"placement\" field specifies the placement information
-          for the federated   resource - The \"overrides\" field specifies how the
-          target resource should vary across   clusters."
+          for the federated resource - The \"overrides\" field specifies how the target
+          resource should vary across clusters."
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -438,13 +423,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -588,13 +566,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -733,13 +704,6 @@ spec:
         type: object
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -813,13 +777,6 @@ spec:
     storage: true
     subresources:
       status: {}
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []
-
 ---
 apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
@@ -929,9 +886,3 @@ spec:
         type: object
     served: true
     storage: true
-status:
-  acceptedNames:
-    kind: ""
-    plural: ""
-  conditions: []
-  storedVersions: []

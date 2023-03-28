@@ -132,10 +132,12 @@ e2e: $(E2E_BINARY_TARGET)
 # Generate code
 generate-code: controller-gen
 	controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	go fix ./...
 
 generate: generate-code kubefedctl
 	./scripts/sync-up-helm-chart.sh
 	./scripts/update-bindata.sh
+	go fix ./...
 
 push: container
 	$(DOCKER) push $(IMAGE):$(GIT_VERSION)
