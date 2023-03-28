@@ -18,7 +18,7 @@ package main
 
 import (
 	"encoding/json"
-	"io/ioutil"
+	"os"
 )
 
 // Cfg defines the configuration options for kazel.
@@ -51,7 +51,7 @@ type Cfg struct {
 
 // ReadCfg reads and unmarshals the specified json file into a Cfg struct.
 func ReadCfg(cfgPath string) (*Cfg, error) {
-	b, err := ioutil.ReadFile(cfgPath)
+	b, err := os.ReadFile(cfgPath)
 	if err != nil {
 		return nil, err
 	}

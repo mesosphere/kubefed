@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"reflect"
@@ -286,7 +285,7 @@ func ReconcileRules(pkgPath string, rules []*build.Rule, managedAttrs []string, 
 	if info.IsDir() {
 		return false, fmt.Errorf("%q cannot be a directory", path)
 	}
-	b, err := ioutil.ReadFile(path)
+	b, err := os.ReadFile(path)
 	if err != nil {
 		return false, err
 	}
@@ -366,7 +365,7 @@ func writeFile(path string, f *build.File, boilerplate []byte, exists, dryRun bo
 	build.Rewrite(f, &info)
 	out = append(out, build.Format(f)...)
 	if exists {
-		orig, err := ioutil.ReadFile(path)
+		orig, err := os.ReadFile(path)
 		if err != nil {
 			return false, err
 		}
@@ -381,7 +380,7 @@ func writeFile(path string, f *build.File, boilerplate []byte, exists, dryRun bo
 		fmt.Fprintf(os.Stderr, "DRY-RUN: wrote %q\n", path)
 		return true, nil
 	}
-	werr := ioutil.WriteFile(path, out, 0644)
+	werr := os.WriteFile(path, out, 0644)
 	if werr == nil {
 		fmt.Fprintf(os.Stderr, "wrote %q\n", path)
 	}

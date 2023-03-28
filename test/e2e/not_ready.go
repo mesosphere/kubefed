@@ -56,7 +56,6 @@ import (
 // will be simulated by a single namespace in the host cluster.  The
 // name of each member cluster's namespace should match the name of
 // the member cluster.
-//
 var _ = Describe("[NOT_READY] Simulated not-ready nodes", func() {
 	baseName := "unhealthy-test"
 	f := framework.NewKubeFedFramework(baseName)

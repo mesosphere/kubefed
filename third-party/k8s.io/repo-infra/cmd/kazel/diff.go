@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"os/exec"
 )
@@ -25,14 +24,14 @@ import (
 // Diff prints the unified diff of the two provided byte slices
 // using the unix diff command.
 func Diff(left, right []byte) error {
-	lf, err := ioutil.TempFile("/tmp", "actual-file-")
+	lf, err := os.CreateTemp("/tmp", "actual-file-")
 	if err != nil {
 		return err
 	}
 	defer lf.Close()
 	defer os.Remove(lf.Name())
 
-	rf, err := ioutil.TempFile("/tmp", "expected-file-")
+	rf, err := os.CreateTemp("/tmp", "expected-file-")
 	if err != nil {
 		return err
 	}

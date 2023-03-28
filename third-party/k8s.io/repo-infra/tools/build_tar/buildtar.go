@@ -25,7 +25,6 @@ import (
 	"flag"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strconv"
@@ -88,7 +87,7 @@ func main() {
 	flag.Parse()
 
 	if flagfile != "" {
-		b, err := ioutil.ReadFile(flagfile)
+		b, err := os.ReadFile(flagfile)
 		if err != nil {
 			klog.Fatalf("couldn't read flagfile: %v", err)
 		}
@@ -264,7 +263,7 @@ func (f *tarFile) addFile(file, dest string) error {
 	default:
 		//regular file
 		header.Typeflag = tar.TypeReg
-		b, err := ioutil.ReadFile(file)
+		b, err := os.ReadFile(file)
 		if err != nil {
 			return err
 		}

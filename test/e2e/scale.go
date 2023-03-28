@@ -64,7 +64,6 @@ import (
 // will be simulated by a single namespace in the host cluster.  The
 // name of each member cluster's namespace should match the name of
 // the member cluster.
-//
 var _ = Describe("Simulated Scale", func() {
 	baseName := "scale-test"
 	f := framework.NewKubeFedFramework(baseName)

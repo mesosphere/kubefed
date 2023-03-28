@@ -336,7 +336,7 @@ func (c *FederatedTypeCrudTester) CheckDelete(fedObject *unstructured.Unstructur
 	targetKind := c.typeConfig.GetTargetType().Kind
 
 	// TODO(marun) Consider using informer to detect expected deletion state.
-	var stateMsg string = "unlabeled"
+	stateMsg := "unlabeled"
 	if deletingInCluster {
 		stateMsg = "not present"
 	}

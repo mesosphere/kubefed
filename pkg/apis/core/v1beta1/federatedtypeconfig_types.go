@@ -114,11 +114,11 @@ type FederatedTypeConfigStatus struct {
 // "target type" - that a user wants to federate. For each target type, there is
 // a corresponding FederatedType that has the following fields:
 //
-// - The "template" field specifies the basic definition of a federated resource
-// - The "placement" field specifies the placement information for the federated
-//   resource
-// - The "overrides" field specifies how the target resource should vary across
-//   clusters.
+//   - The "template" field specifies the basic definition of a federated resource
+//   - The "placement" field specifies the placement information for the federated
+//     resource
+//   - The "overrides" field specifies how the target resource should vary across
+//     clusters.
 type FederatedTypeConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`

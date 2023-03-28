@@ -25,7 +25,7 @@ import (
 // GroupQualifiedName returns the plural name of the api resource
 // optionally qualified by its group:
 //
-//   '<target plural name>[.<target group name>]'
+//	'<target plural name>[.<target group name>]'
 //
 // This is the naming scheme for FederatedTypeConfig resources.  The
 // scheme ensures that, for a given KubeFed control plane,
