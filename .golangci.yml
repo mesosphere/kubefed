@@ -6,7 +6,6 @@ run:
 linters:
   disable-all: true
   enable:
-  - deadcode
   - errcheck
   - goconst
   - gocritic
@@ -17,12 +16,10 @@ linters:
   - nolintlint
   - prealloc
   - staticcheck
-  - structcheck
   - stylecheck
   - typecheck
   - unparam
   - unused
-  - varcheck
   - whitespace
 
 linters-settings:
