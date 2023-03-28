@@ -68,11 +68,7 @@ curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin
 )
 chmod +x "${dest_dir}/kubectl"
 
-kubebuilder_version="2.3.2"
-curl -L https://github.com/kubernetes-sigs/kubebuilder/releases/download/v${kubebuilder_version}/kubebuilder_${kubebuilder_version}_${platform}_amd64.tar.gz | \
-  tar xzP -C "${dest_dir}" --strip-components=2 -- "kubebuilder_${kubebuilder_version}_${platform}_amd64/bin/kubebuilder"
-
-golint_version="1.40.1"
+golint_version="1.51.2"
 golint_dir="golangci-lint-${golint_version}-${platform}-amd64"
 golint_tgz="${golint_dir}.tar.gz"
 golint_url="https://github.com/golangci/golangci-lint/releases/download/v${golint_version}/${golint_tgz}"
