@@ -17,7 +17,6 @@ limitations under the License.
 package main
 
 import (
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -75,7 +74,7 @@ func (v *Vendorer) findGeneratorTags(root string, requestedTags map[string]bool)
 			return nil
 		}
 
-		b, err := ioutil.ReadFile(path)
+		b, err := os.ReadFile(path)
 		if err != nil {
 			return err
 		}
@@ -164,7 +163,7 @@ func (v *Vendorer) walkGenerated() (bool, error) {
 
 	var boilerplate []byte
 	if v.cfg.K8sCodegenBoilerplateFile != "" {
-		boilerplate, err = ioutil.ReadFile(v.cfg.K8sCodegenBoilerplateFile)
+		boilerplate, err = os.ReadFile(v.cfg.K8sCodegenBoilerplateFile)
 		if err != nil {
 			return false, err
 		}

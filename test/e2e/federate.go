@@ -19,7 +19,6 @@ package e2e
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"reflect"
 
@@ -176,7 +175,7 @@ var _ = Describe("Federate ", func() {
 	})
 
 	It("input yaml from a file, should emit equivalent federated resources", func() {
-		tmpFile, err := ioutil.TempFile("", "tmp-")
+		tmpFile, err := os.CreateTemp("", "tmp-")
 		if err != nil {
 			tl.Fatalf("Error creating temperory file: %v", err)
 		}

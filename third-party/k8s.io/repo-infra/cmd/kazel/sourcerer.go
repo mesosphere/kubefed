@@ -18,7 +18,7 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
+	"os"
 	"path/filepath"
 
 	"github.com/bazelbuild/buildtools/build"
@@ -45,7 +45,7 @@ func (v *Vendorer) walkSource(pkgPath string) ([]string, error) {
 			return nil, nil
 		}
 	}
-	files, err := ioutil.ReadDir(pkgPath)
+	files, err := os.ReadDir(pkgPath)
 	if err != nil {
 		return nil, err
 	}

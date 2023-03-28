@@ -78,7 +78,7 @@ func NewCmdOrphaning(cmdOut io.Writer, config util.FedConfig) *cobra.Command {
 	return cmd
 }
 
-//  Complete ensures that options are valid and marshals them if necessary.
+// Complete ensures that options are valid and marshals them if necessary.
 func (o *orphanResource) Complete(args []string, config util.FedConfig) error {
 	if len(args) == 0 {
 		return errors.New("resource type is required")

@@ -24,6 +24,8 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -282,14 +284,14 @@ func (d *managedDispatcherImpl) recordOperationError(propStatus status.Propagati
 func (d *managedDispatcherImpl) recordError(clusterName, operation string, err error) {
 	targetName := d.unmanagedDispatcher.targetNameForCluster(clusterName)
 	args := []interface{}{operation, d.fedResource.TargetKind(), targetName, clusterName}
-	eventType := fmt.Sprintf("%sInClusterFailed", strings.ReplaceAll(strings.Title(operation), " ", ""))
+	eventType := fmt.Sprintf("%sInClusterFailed", strings.ReplaceAll(cases.Title(language.AmericanEnglish).String(operation), " ", ""))
 	d.fedResource.RecordError(eventType, errors.Wrapf(err, "Failed to "+eventTemplate, args...))
 }
 
 func (d *managedDispatcherImpl) recordEvent(clusterName, operation, operationContinuous string) {
 	targetName := d.unmanagedDispatcher.targetNameForCluster(clusterName)
 	args := []interface{}{operationContinuous, d.fedResource.TargetKind(), targetName, clusterName}
-	eventType := fmt.Sprintf("%sInCluster", strings.ReplaceAll(strings.Title(operation), " ", ""))
+	eventType := fmt.Sprintf("%sInCluster", strings.ReplaceAll(cases.Title(language.AmericanEnglish).String(operation), " ", ""))
 	d.fedResource.RecordEvent(eventType, eventTemplate, args...)
 }
 

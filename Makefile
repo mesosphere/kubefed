@@ -15,7 +15,7 @@
 SHELL := /bin/bash
 TARGET = kubefed
 GOTARGET = sigs.k8s.io/$(TARGET)
-REGISTRY ?= quay.io/kubernetes-multicluster
+REGISTRY ?= ghcr.io/mesosphere
 IMAGE = $(REGISTRY)/$(TARGET)
 DIR := ${CURDIR}
 BIN_DIR := bin
@@ -44,7 +44,7 @@ endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
 # .github/workflows files.
-BUILD_IMAGE ?= golang:1.16.6
+BUILD_IMAGE ?= golang:1.20.2
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
@@ -132,10 +132,12 @@ e2e: $(E2E_BINARY_TARGET)
 # Generate code
 generate-code: controller-gen
 	controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	go fix ./...
 
 generate: generate-code kubefedctl
 	./scripts/sync-up-helm-chart.sh
 	./scripts/update-bindata.sh
+	go fix ./...
 
 push: container
 	$(DOCKER) push $(IMAGE):$(GIT_VERSION)

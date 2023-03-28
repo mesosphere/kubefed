@@ -19,7 +19,6 @@ package e2e
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"os/exec"
 
@@ -77,7 +76,7 @@ var _ = Describe("Leader Elector", func() {
 
 func spawnControllerManagerProcess(tl common.TestLogger, kubeConfigPath, namespace string) (*exec.Cmd, io.ReadCloser, error) {
 	kubeFedConfigAsset := common.MustAsset("config/kubefedconfig.yaml")
-	tmpFile, err := ioutil.TempFile("", "leaderelectionconfig.yaml")
+	tmpFile, err := os.CreateTemp("", "leaderelectionconfig.yaml")
 	if err != nil {
 		tl.Fatalf("Error creating the temp file for KubeFedConfig resource: %v", err)
 	}

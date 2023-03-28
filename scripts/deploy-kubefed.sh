@@ -110,7 +110,7 @@ if [[ -z "${IMAGE_NAME}" ]]; then
 
 <image>        should be in the form <containerregistry>/<username>/<imagename>:<tagname>
 
-Example: docker.io/<username>/kubefed:test
+Example: ghcr.io/<username>/kubefed:test
 
 If intending to use the docker hub as the container registry to push
 the KubeFed image to, make sure to login to the local docker daemon

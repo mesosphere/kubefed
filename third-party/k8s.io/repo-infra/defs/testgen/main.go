@@ -24,8 +24,8 @@ import (
 	"go/parser"
 	"go/token"
 	"go/types"
-	"io/ioutil"
 	"log"
+	"os"
 )
 
 var (
@@ -49,7 +49,7 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if err := ioutil.WriteFile(*out, []byte(fmt.Sprintf("package %s\nconst OK = true", pkg.Name())), 0666); err != nil {
+	if err := os.WriteFile(*out, []byte(fmt.Sprintf("package %s\nconst OK = true", pkg.Name())), 0666); err != nil {
 		log.Fatal(err)
 	}
 }
