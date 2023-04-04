@@ -29,38 +29,38 @@ func HasFinalizer(obj runtimeclient.Object, finalizer string) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	finalizers := sets.NewString(accessor.GetFinalizers()...)
+	finalizers := sets.New(accessor.GetFinalizers()...)
 	return finalizers.Has(finalizer), nil
 }
 
 // AddFinalizers adds the given finalizers to the given objects ObjectMeta.
 // Returns true if the object was updated.
-func AddFinalizers(obj runtimeclient.Object, newFinalizers sets.String) (bool, error) {
+func AddFinalizers(obj runtimeclient.Object, newFinalizers sets.Set[string]) (bool, error) {
 	accessor, err := meta.Accessor(obj)
 	if err != nil {
 		return false, err
 	}
-	oldFinalizers := sets.NewString(accessor.GetFinalizers()...)
+	oldFinalizers := sets.New(accessor.GetFinalizers()...)
 	if oldFinalizers.IsSuperset(newFinalizers) {
 		return false, nil
 	}
 	allFinalizers := oldFinalizers.Union(newFinalizers)
-	accessor.SetFinalizers(allFinalizers.List())
+	accessor.SetFinalizers(sets.List(allFinalizers))
 	return true, nil
 }
 
 // RemoveFinalizers removes the given finalizers from the given objects ObjectMeta.
 // Returns true if the object was updated.
-func RemoveFinalizers(obj runtimeclient.Object, finalizers sets.String) (bool, error) {
+func RemoveFinalizers(obj runtimeclient.Object, finalizers sets.Set[string]) (bool, error) {
 	accessor, err := meta.Accessor(obj)
 	if err != nil {
 		return false, err
 	}
-	oldFinalizers := sets.NewString(accessor.GetFinalizers()...)
+	oldFinalizers := sets.New(accessor.GetFinalizers()...)
 	if oldFinalizers.Intersection(finalizers).Len() == 0 {
 		return false, nil
 	}
 	newFinalizers := oldFinalizers.Difference(finalizers)
-	accessor.SetFinalizers(newFinalizers.List())
+	accessor.SetFinalizers(sets.List(newFinalizers))
 	return true, nil
 }

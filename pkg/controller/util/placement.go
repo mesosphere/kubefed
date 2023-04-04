@@ -108,7 +108,7 @@ func SetClusterSelector(obj *unstructured.Unstructured, clusterSelector map[stri
 // because the single namespace by definition must exist on member
 // clusters, so namespace placement becomes a mechanism for limiting
 // rather than allowing propagation.
-func ComputeNamespacedPlacement(resource, namespace *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, limitedScope bool, selectorOnly bool) (selectedClusters sets.String, err error) {
+func ComputeNamespacedPlacement(resource, namespace *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, limitedScope bool, selectorOnly bool) (selectedClusters sets.Set[string], err error) {
 	resourceClusters, err := ComputePlacement(resource, clusters, selectorOnly)
 	if err != nil {
 		return nil, err
@@ -122,7 +122,7 @@ func ComputeNamespacedPlacement(resource, namespace *unstructured.Unstructured, 
 			return resourceClusters, nil
 		}
 		// Resource should not exist in any member clusters.
-		return sets.String{}, nil
+		return sets.Set[string]{}, nil
 	}
 
 	namespaceClusters, err := ComputePlacement(namespace, clusters, selectorOnly)
@@ -137,7 +137,7 @@ func ComputeNamespacedPlacement(resource, namespace *unstructured.Unstructured, 
 
 // ComputePlacement determines the selected clusters for a federated
 // resource.
-func ComputePlacement(resource *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, selectorOnly bool) (selectedClusters sets.String, err error) {
+func ComputePlacement(resource *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, selectorOnly bool) (selectedClusters sets.Set[string], err error) {
 	selectedNames, err := selectedClusterNames(resource, clusters, selectorOnly)
 	if err != nil {
 		return nil, err
@@ -146,13 +146,13 @@ func ComputePlacement(resource *unstructured.Unstructured, clusters []*fedv1b1.K
 	return clusterNames.Intersection(selectedNames), nil
 }
 
-func selectedClusterNames(resource *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, selectorOnly bool) (sets.String, error) {
+func selectedClusterNames(resource *unstructured.Unstructured, clusters []*fedv1b1.KubeFedCluster, selectorOnly bool) (sets.Set[string], error) {
 	placement, err := UnmarshalGenericPlacement(resource)
 	if err != nil {
 		return nil, err
 	}
 
-	selectedNames := sets.String{}
+	selectedNames := sets.Set[string]{}
 	clusterNames := placement.ClusterNames()
 	// Only use selector if clusters are nil. An empty list of
 	// clusters implies no clusters are selected.
@@ -175,8 +175,8 @@ func selectedClusterNames(resource *unstructured.Unstructured, clusters []*fedv1
 	return selectedNames, nil
 }
 
-func getClusterNames(clusters []*fedv1b1.KubeFedCluster) sets.String {
-	clusterNames := sets.String{}
+func getClusterNames(clusters []*fedv1b1.KubeFedCluster) sets.Set[string] {
+	clusterNames := sets.Set[string]{}
 	for _, cluster := range clusters {
 		clusterNames.Insert(cluster.Name)
 	}

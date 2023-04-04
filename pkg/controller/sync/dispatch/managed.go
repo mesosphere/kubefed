@@ -112,7 +112,7 @@ func (d *managedDispatcherImpl) Wait() (bool, error) {
 	d.RLock()
 	defer d.RUnlock()
 	// Transition timed out status for this set to ok.
-	okTimedOut := sets.NewString(
+	okTimedOut := sets.New(
 		string(status.CreationTimedOut),
 		string(status.UpdateTimedOut),
 	)

@@ -199,7 +199,7 @@ func (c *FederatedTypeCrudTester) CheckUpdate(fedObject *unstructured.Unstructur
 			if _, ok := overrides[clusterName]; !ok {
 				overrides[clusterName] = util.ClusterOverrides{}
 			}
-			paths := sets.NewString()
+			paths := sets.New[string]()
 			for _, overrideItem := range overrides[clusterName] {
 				paths.Insert(overrideItem.Path)
 			}
