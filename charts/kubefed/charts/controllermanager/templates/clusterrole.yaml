@@ -42,6 +42,17 @@ rules:
   - update
   - patch
 - apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - watch
+  - list
+  - create
+  - update
+  - patch
+- apiGroups:
   - types.kubefed.io
   resources:
   - '*'
