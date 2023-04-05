@@ -8,6 +8,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"k8s.io/client-go/tools/clientcmd"
+	apiserverflag "k8s.io/component-base/cli/flag"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
@@ -48,14 +49,18 @@ func NewWebhookCommand(stopChan <-chan struct{}) *cobra.Command {
 		},
 	}
 
-	// Add the command line flags from other dependencies(klog, kubebuilder, etc.)
-	cmd.Flags().AddGoFlagSet(flag.CommandLine)
-
 	cmd.Flags().StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
 	cmd.Flags().StringVar(&masterURL, "master", "", "The address of the Kubernetes API server. Overrides any value in kubeconfig. Only required if out-of-cluster.")
 	cmd.Flags().StringVar(&certDir, "cert-dir", "", "The directory where the TLS certs are located.")
 	cmd.Flags().IntVar(&port, "secure-port", port, "The port on which to serve HTTPS.")
 	cmd.Flags().BoolVar(&verFlag, "version", false, "Prints the Version info of webhook.")
+
+	// Add the command line flags from other dependencies(klog, kubebuilder, etc.).
+	// do not warn if they contain underscores.
+	local := &flag.FlagSet{}
+	klog.InitFlags(local)
+	cmd.Flags().AddGoFlagSet(local)
+	cmd.Flags().SetNormalizeFunc(apiserverflag.WordSepNormalizeFunc)
 
 	return cmd
 }
