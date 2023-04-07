@@ -53,7 +53,7 @@ func NewKubeFedLeaderElector(opts *options.Options, fnStartControllers func(*opt
 
 	// add a uniquifier so that two processes on the same host don't accidentally both become active
 	id := hostname + "_" + string(uuid.NewUUID())
-	rl, err := resourcelock.New(string(opts.LeaderElection.ResourceLock),
+	rl, err := resourcelock.New(resourcelock.LeasesResourceLock,
 		opts.Config.KubeFedNamespace,
 		component,
 		leaderElectionClient.CoreV1(),

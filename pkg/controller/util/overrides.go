@@ -60,7 +60,7 @@ type GenericOverride struct {
 // Ingress which can exist in different groups at different
 // versions. Users will need to take care not to abuse this
 // capability.
-var invalidPaths = sets.NewString(
+var invalidPaths = sets.New(
 	"/metadata/namespace",
 	"/metadata/name",
 	"/metadata/generateName",
@@ -115,7 +115,7 @@ func GetOverrides(rawObj *unstructured.Unstructured) (OverridesMap, error) {
 
 		clusterOverrides := overrideItem.ClusterOverrides
 
-		paths := sets.NewString()
+		paths := sets.New[string]()
 		for i, clusterOverride := range clusterOverrides {
 			path := clusterOverride.Path
 			if invalidPaths.Has(path) {

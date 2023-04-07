@@ -50,7 +50,7 @@ type FederatedResource interface {
 	FederatedKind() string
 	UpdateVersions(selectedClusters []string, versionMap map[string]string) error
 	DeleteVersions()
-	ComputePlacement(clusters []*fedv1b1.KubeFedCluster) (selectedClusters sets.String, err error)
+	ComputePlacement(clusters []*fedv1b1.KubeFedCluster) (selectedClusters sets.Set[string], err error)
 	NamespaceNotFederated() bool
 }
 
@@ -129,7 +129,7 @@ func (r *federatedResource) DeleteVersions() {
 	r.versionManager.Delete(r.federatedName)
 }
 
-func (r *federatedResource) ComputePlacement(clusters []*fedv1b1.KubeFedCluster) (sets.String, error) {
+func (r *federatedResource) ComputePlacement(clusters []*fedv1b1.KubeFedCluster) (sets.Set[string], error) {
 	if r.typeConfig.GetNamespaced() {
 		return util.ComputeNamespacedPlacement(r.federatedResource, r.fedNamespace, clusters, r.limitedScope, false)
 	}

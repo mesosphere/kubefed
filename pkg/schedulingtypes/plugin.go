@@ -146,7 +146,7 @@ func (p *Plugin) FederatedTypeExists(key string) bool {
 	return exist
 }
 
-func (p *Plugin) GetResourceClusters(qualifiedName util.QualifiedName, clusters []*fedv1b1.KubeFedCluster) (selectedClusters sets.String, err error) {
+func (p *Plugin) GetResourceClusters(qualifiedName util.QualifiedName, clusters []*fedv1b1.KubeFedCluster) (selectedClusters sets.Set[string], err error) {
 	fedObject, err := p.federatedTypeClient.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
 	if err != nil {
 		return nil, err

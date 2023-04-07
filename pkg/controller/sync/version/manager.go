@@ -428,7 +428,7 @@ func ownerReferenceForUnstructured(obj *unstructured.Unstructured) metav1.OwnerR
 func updateClusterVersions(oldVersions []fedv1a1.ClusterObjectVersion,
 	newVersions map[string]string, selectedClusters []string) []fedv1a1.ClusterObjectVersion {
 	// Retain versions for selected clusters that were not changed
-	selectedClusterSet := sets.NewString(selectedClusters...)
+	selectedClusterSet := sets.New(selectedClusters...)
 	for _, oldVersion := range oldVersions {
 		if !selectedClusterSet.Has(oldVersion.ClusterName) {
 			continue

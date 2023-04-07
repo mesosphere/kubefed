@@ -79,37 +79,37 @@ func TestHasFinalizer(t *testing.T) {
 func TestAddFinalizers(t *testing.T) {
 	testCases := []struct {
 		obj           runtimeclient.Object
-		finalizers    sets.String
+		finalizers    sets.Set[string]
 		isUpdated     bool
 		newFinalizers []string
 	}{
 		{
 			newObj([]string{}),
-			sets.NewString(),
+			sets.New[string](),
 			false,
 			[]string{},
 		},
 		{
 			newObj([]string{}),
-			sets.NewString("someFinalizer"),
+			sets.New("someFinalizer"),
 			true,
 			[]string{"someFinalizer"},
 		},
 		{
 			newObj([]string{"someFinalizer"}),
-			sets.NewString(),
+			sets.New[string](),
 			false,
 			[]string{"someFinalizer"},
 		},
 		{
 			newObj([]string{"someFinalizer"}),
-			sets.NewString("anotherFinalizer"),
+			sets.New("anotherFinalizer"),
 			true,
 			[]string{"anotherFinalizer", "someFinalizer"},
 		},
 		{
 			newObj([]string{"someFinalizer"}),
-			sets.NewString("someFinalizer"),
+			sets.New("someFinalizer"),
 			false,
 			[]string{"someFinalizer"},
 		},
@@ -126,37 +126,37 @@ func TestAddFinalizers(t *testing.T) {
 func TestRemoveFinalizers(t *testing.T) {
 	testCases := []struct {
 		obj           runtimeclient.Object
-		finalizers    sets.String
+		finalizers    sets.Set[string]
 		isUpdated     bool
 		newFinalizers []string
 	}{
 		{
 			newObj([]string{}),
-			sets.NewString(),
+			sets.New[string](),
 			false,
 			[]string{},
 		},
 		{
 			newObj([]string{}),
-			sets.NewString("someFinalizer"),
+			sets.New("someFinalizer"),
 			false,
 			[]string{},
 		},
 		{
 			newObj([]string{"someFinalizer"}),
-			sets.NewString(),
+			sets.New[string](),
 			false,
 			[]string{"someFinalizer"},
 		},
 		{
 			newObj([]string{"someFinalizer"}),
-			sets.NewString("anotherFinalizer"),
+			sets.New("anotherFinalizer"),
 			false,
 			[]string{"someFinalizer"},
 		},
 		{
 			newObj([]string{"someFinalizer", "anotherFinalizer"}),
-			sets.NewString("someFinalizer"),
+			sets.New("someFinalizer"),
 			true,
 			[]string{"anotherFinalizer"},
 		},

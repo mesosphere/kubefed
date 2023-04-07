@@ -174,7 +174,7 @@ func (c *ClusterClient) GetClusterZones() ([]string, string, error) {
 		return nil, "", err
 	}
 
-	zones := sets.NewString()
+	zones := sets.New[string]()
 	region := ""
 	for i, node := range nodes.Items {
 		zone := getZoneNameForNode(node)
@@ -186,7 +186,7 @@ func (c *ClusterClient) GetClusterZones() ([]string, string, error) {
 			zones.Insert(zone)
 		}
 	}
-	return zones.List(), region, nil
+	return sets.List(zones), region, nil
 }
 
 // Find the name of the zone in which a Node is running.

@@ -276,7 +276,7 @@ func (s *KubeFedSyncController) reconcile(qualifiedName util.QualifiedName) util
 			runtime.HandleError(wrappedErr)
 			return util.StatusError
 		}
-		clusterNames := sets.NewString()
+		clusterNames := sets.New[string]()
 		for _, cluster := range clusters {
 			clusterNames = clusterNames.Insert(cluster.Name)
 		}
@@ -338,7 +338,7 @@ func (s *KubeFedSyncController) syncToClusters(fedResource FederatedResource) ut
 
 	kind := fedResource.TargetKind()
 	key := fedResource.TargetName().String()
-	klog.V(4).Infof("Ensuring %s %q in clusters: %s", kind, key, strings.Join(selectedClusterNames.List(), ","))
+	klog.V(4).Infof("Ensuring %s %q in clusters: %s", kind, key, strings.Join(sets.List(selectedClusterNames), ","))
 
 	dispatcher := dispatch.NewManagedDispatcher(s.informer.GetClientForCluster, fedResource, s.skipAdoptingResources, enableRawResourceStatusCollection)
 
@@ -408,7 +408,7 @@ func (s *KubeFedSyncController) syncToClusters(fedResource FederatedResource) ut
 	}
 	// Write updated versions to the API.
 	updatedVersionMap := dispatcher.VersionMap()
-	err = fedResource.UpdateVersions(selectedClusterNames.List(), updatedVersionMap)
+	err = fedResource.UpdateVersions(sets.List(selectedClusterNames), updatedVersionMap)
 	if err != nil {
 		// Versioning of federated resources is an optimization to
 		// avoid unnecessary updates, and failure to record version
@@ -497,7 +497,7 @@ func (s *KubeFedSyncController) ensureDeletion(fedResource FederatedResource) ut
 
 	obj := fedResource.Object()
 
-	finalizers := sets.NewString(obj.GetFinalizers()...)
+	finalizers := sets.New(obj.GetFinalizers()...)
 	if !finalizers.Has(FinalizerSyncController) {
 		klog.V(2).Infof("%s %q does not have the %q finalizer. Nothing to do.", kind, key, FinalizerSyncController)
 		return util.StatusAllOK
@@ -557,7 +557,7 @@ func (s *KubeFedSyncController) ensureDeletion(fedResource FederatedResource) ut
 
 // removeManagedLabel attempts to remove the managed label from
 // resources with the given name in member clusters.
-func (s *KubeFedSyncController) removeManagedLabel(gvk schema.GroupVersionKind, qualifiedName util.QualifiedName, clusters sets.String) error {
+func (s *KubeFedSyncController) removeManagedLabel(gvk schema.GroupVersionKind, qualifiedName util.QualifiedName, clusters sets.Set[string]) error {
 	ok, err := s.handleDeletionInClusters(gvk, qualifiedName, clusters, func(dispatcher dispatch.UnmanagedDispatcher, clusterName string, clusterObj *unstructured.Unstructured) {
 		if clusterObj.GetDeletionTimestamp() != nil {
 			return
@@ -680,7 +680,7 @@ func (s *KubeFedSyncController) ensureRemovedOrUnmanaged(fedResource FederatedRe
 
 // handleDeletionInClusters invokes the provided deletion handler for
 // each managed resource in member clusters.
-func (s *KubeFedSyncController) handleDeletionInClusters(gvk schema.GroupVersionKind, qualifiedName util.QualifiedName, clusters sets.String,
+func (s *KubeFedSyncController) handleDeletionInClusters(gvk schema.GroupVersionKind, qualifiedName util.QualifiedName, clusters sets.Set[string],
 	deletionFunc func(dispatcher dispatch.UnmanagedDispatcher, clusterName string, clusterObj *unstructured.Unstructured)) (bool, error) {
 	memberClusters, err := s.informer.GetClusters()
 	if err != nil {

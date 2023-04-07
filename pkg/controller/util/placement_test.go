@@ -47,32 +47,32 @@ func TestSelectedClusterNames(t *testing.T) {
 	testCases := map[string]struct {
 		clusterNames    []string
 		clusterSelector map[string]string
-		expectedNames   sets.String
+		expectedNames   sets.Set[string]
 	}{
 		"ignore cluster selector when cluster names present": {
 			clusterNames:    []string{"cluster1"},
 			clusterSelector: map[string]string{},
-			expectedNames:   sets.NewString("cluster1"),
+			expectedNames:   sets.New("cluster1"),
 		},
 		"no clusters when cluster names and selector absent": {
-			expectedNames: sets.NewString(),
+			expectedNames: sets.New[string](),
 		},
 		"no clusters when cluster names empty and selector not empty": {
 			clusterNames: []string{},
 			clusterSelector: map[string]string{
 				"foo": "bar",
 			},
-			expectedNames: sets.NewString(),
+			expectedNames: sets.New[string](),
 		},
 		"all clusters when cluster names absent and selector empty": {
 			clusterSelector: map[string]string{},
-			expectedNames:   sets.NewString("cluster1", "cluster2"),
+			expectedNames:   sets.New("cluster1", "cluster2"),
 		},
 		"selected clusters when cluster names absent and selector not empty": {
 			clusterSelector: map[string]string{
 				"foo": "bar",
 			},
-			expectedNames: sets.NewString("cluster2"),
+			expectedNames: sets.New("cluster2"),
 		},
 	}
 

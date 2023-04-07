@@ -116,7 +116,7 @@ func federatedTypeValidationSchema(templateSchema map[string]v1.JSONSchemaProps)
 												Type: "string",
 											},
 											"value": {
-												XPreserveUnknownFields: pointer.BoolPtr(true),
+												XPreserveUnknownFields: pointer.Bool(true),
 											},
 										},
 										Required: []string{
@@ -134,7 +134,7 @@ func federatedTypeValidationSchema(templateSchema map[string]v1.JSONSchemaProps)
 	if templateSchema != nil {
 		specProperties := schema.OpenAPIV3Schema.Properties["spec"].Properties
 		specProperties["template"] = v1.JSONSchemaProps{
-			XPreserveUnknownFields: pointer.BoolPtr(true),
+			XPreserveUnknownFields: pointer.Bool(true),
 			Type:                   "object",
 		}
 		// Add retainReplicas field to types that exposes a replicas
@@ -216,7 +216,7 @@ func ValidationSchema(specProps v1.JSONSchemaProps) *v1.CustomResourceValidation
 											Type: "string",
 										},
 										"remoteStatus": {
-											XPreserveUnknownFields: pointer.BoolPtr(true),
+											XPreserveUnknownFields: pointer.Bool(true),
 											Type:                   "object",
 										},
 									},

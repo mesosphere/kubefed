@@ -22,11 +22,9 @@ import (
 	"errors"
 	goflag "flag"
 	"fmt"
-	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
-	"time"
 
 	"github.com/spf13/cobra"
 
@@ -44,8 +42,6 @@ import (
 )
 
 func main() {
-	rand.Seed(time.Now().UnixNano())
-
 	hyperfedCommand, allCommandFns := NewHyperFedCommand()
 
 	flags := hyperfedCommand.Flags()
