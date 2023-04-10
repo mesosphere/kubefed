@@ -37,6 +37,9 @@ spec:
         {{- toYaml .Values.commonNodeSelector | nindent 8 }}
       tolerations:
         {{- toYaml .Values.commonTolerations | nindent 8 }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
+      {{- end }}
       securityContext:
         runAsUser: 1001
       serviceAccountName: kubefed-controller
@@ -103,6 +106,9 @@ spec:
         {{- toYaml .Values.commonNodeSelector | nindent 8 }}
       tolerations:
         {{- toYaml .Values.commonTolerations | nindent 8 }}
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
+      {{- end }}
       securityContext:
         runAsUser: 1001
       serviceAccountName: kubefed-admission-webhook
