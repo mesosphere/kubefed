@@ -53,6 +53,9 @@ spec:
       restartPolicy: Never
       serviceAccountName: kubefed-config-hook
       automountServiceAccountToken: true
+      {{- if .Values.global.priorityClassName }}
+      priorityClassName: "{{ .Values.global.priorityClassName }}"
+      {{- end }}
       containers:
       - name: post-install-job
         image: "{{ .Values.postInstallJob.repository }}/{{ .Values.postInstallJob.image }}:{{ .Values.postInstallJob.tag }}"
