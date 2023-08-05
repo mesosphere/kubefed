@@ -18,7 +18,7 @@ package enable
 
 import (
 	v1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	"sigs.k8s.io/kubefed/pkg/controller/util"
 )
@@ -116,7 +116,7 @@ func federatedTypeValidationSchema(templateSchema map[string]v1.JSONSchemaProps)
 												Type: "string",
 											},
 											"value": {
-												XPreserveUnknownFields: pointer.Bool(true),
+												XPreserveUnknownFields: ptr.To(true),
 											},
 										},
 										Required: []string{
@@ -134,7 +134,7 @@ func federatedTypeValidationSchema(templateSchema map[string]v1.JSONSchemaProps)
 	if templateSchema != nil {
 		specProperties := schema.OpenAPIV3Schema.Properties["spec"].Properties
 		specProperties["template"] = v1.JSONSchemaProps{
-			XPreserveUnknownFields: pointer.Bool(true),
+			XPreserveUnknownFields: ptr.To(true),
 			Type:                   "object",
 		}
 		// Add retainReplicas field to types that exposes a replicas
@@ -216,7 +216,7 @@ func ValidationSchema(specProps v1.JSONSchemaProps) *v1.CustomResourceValidation
 											Type: "string",
 										},
 										"remoteStatus": {
-											XPreserveUnknownFields: pointer.Bool(true),
+											XPreserveUnknownFields: ptr.To(true),
 											Type:                   "object",
 										},
 									},

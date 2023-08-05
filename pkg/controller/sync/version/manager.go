@@ -206,7 +206,10 @@ func (m *VersionManager) Delete(qualifiedName util.QualifiedName) {
 func (m *VersionManager) list(stopChan <-chan struct{}) (runtimeclient.ObjectList, bool) {
 	// Attempt retrieval of list of versions until success or the channel is closed.
 	var versionList runtimeclient.ObjectList
-	err := wait.PollImmediateInfinite(1*time.Second, func() (bool, error) {
+
+	ctx, cancelFn := context.WithCancel(context.TODO())
+	defer cancelFn()
+	if err := wait.PollUntilContextCancel(ctx, 1*time.Second, true, func(ctx context.Context) (done bool, err error) {
 		select {
 		case <-stopChan:
 			klog.V(4).Infof("Halting version manager list due to closed stop channel")
@@ -214,15 +217,14 @@ func (m *VersionManager) list(stopChan <-chan struct{}) (runtimeclient.ObjectLis
 		default:
 		}
 		versionList = m.adapter.NewListObject()
-		err := m.client.List(context.TODO(), versionList, m.namespace)
-		if err != nil {
+		e := m.client.List(ctx, versionList, m.namespace)
+		if e != nil {
 			runtime.HandleError(errors.Wrapf(err, "Failed to list propagated versions for %q", m.federatedKind))
 			// Do not return the error to allow the operation to be retried.
 			return false, nil
 		}
 		return true, nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, false
 	}
 	return versionList, true
@@ -285,11 +287,11 @@ func (m *VersionManager) writeVersion(obj runtimeclient.Object, qualifiedName ut
 	refreshVersion := false
 	// TODO(marun) Centralize polling interval and duration
 	waitDuration := 30 * time.Second
-	err = wait.PollImmediate(100*time.Millisecond, waitDuration, func() (bool, error) {
+	err = wait.PollUntilContextTimeout(context.TODO(), 100*time.Millisecond, waitDuration, true, func(ctx context.Context) (bool, error) {
 		if refreshVersion {
 			// Version was written to the API by another process after the last manager write.
 			var err error
-			resourceVersion, err = m.getResourceVersionFromAPI(qualifiedName)
+			resourceVersion, err = m.getResourceVersionFromAPI(ctx, qualifiedName)
 			if err != nil {
 				runtime.HandleError(errors.Wrapf(err, "Failed to refresh the resourceVersion for %s %q from the API", adapterType, key))
 				return false, nil
@@ -308,7 +310,7 @@ func (m *VersionManager) writeVersion(obj runtimeclient.Object, qualifiedName ut
 			}
 
 			klog.V(4).Infof("Creating %s %q", adapterType, qualifiedName)
-			err = m.client.Create(context.TODO(), createdObj)
+			err = m.client.Create(ctx, createdObj)
 			if apierrors.IsAlreadyExists(err) {
 				klog.V(4).Infof("%s %q was created by another process. Will refresh the resourceVersion and attempt to update.", adapterType, qualifiedName)
 				refreshVersion = true
@@ -343,7 +345,7 @@ func (m *VersionManager) writeVersion(obj runtimeclient.Object, qualifiedName ut
 		}
 
 		klog.V(4).Infof("Updating the status of %s %q", adapterType, qualifiedName)
-		err = m.client.UpdateStatus(context.TODO(), updatedObj)
+		err = m.client.UpdateStatus(ctx, updatedObj)
 		if apierrors.IsConflict(err) {
 			klog.V(4).Infof("%s %q was updated by another process. Will refresh the resourceVersion and retry the update.", adapterType, qualifiedName)
 			refreshVersion = true
@@ -388,10 +390,10 @@ func (m *VersionManager) writeVersion(obj runtimeclient.Object, qualifiedName ut
 	return nil
 }
 
-func (m *VersionManager) getResourceVersionFromAPI(qualifiedName util.QualifiedName) (string, error) {
+func (m *VersionManager) getResourceVersionFromAPI(ctx context.Context, qualifiedName util.QualifiedName) (string, error) {
 	klog.V(4).Infof("Retrieving resourceVersion for %s %q from the API", m.federatedKind, qualifiedName)
 	obj := m.adapter.NewObject()
-	err := m.client.Get(context.TODO(), obj, qualifiedName.Namespace, qualifiedName.Name)
+	err := m.client.Get(ctx, obj, qualifiedName.Namespace, qualifiedName.Name)
 	if err != nil {
 		return "", err
 	}

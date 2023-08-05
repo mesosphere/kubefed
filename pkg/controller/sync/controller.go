@@ -210,7 +210,7 @@ func (s *KubeFedSyncController) Run(stopChan <-chan struct{}) {
 
 // Wait until all data stores are in sync for a definitive timeout, and returns if there is an error or a timeout.
 func (s *KubeFedSyncController) waitForSync() error {
-	return wait.PollImmediate(util.SyncedPollPeriod, s.cacheSyncTimeout, func() (bool, error) {
+	return wait.PollUntilContextTimeout(context.TODO(), util.SyncedPollPeriod, s.cacheSyncTimeout, true, func(_ context.Context) (bool, error) {
 		return s.isSynced(), nil
 	})
 }
@@ -447,7 +447,7 @@ func (s *KubeFedSyncController) setFederatedStatus(fedResource FederatedResource
 
 	// If the underlying resource has changed, attempt to retrieve and
 	// update it repeatedly.
-	err := wait.PollImmediate(1*time.Second, 5*time.Second, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), 1*time.Second, 5*time.Second, true, func(ctx context.Context) (bool, error) {
 		if updateRequired, err := status.SetFederatedStatus(obj, reason, *collectedStatus, *collectedResourceStatus, resourceStatusCollection); err != nil {
 			klog.V(4).Infof("Failed to set the status for %s %q", kind, name)
 			return false, errors.Wrapf(err, "failed to set the status")
@@ -456,13 +456,13 @@ func (s *KubeFedSyncController) setFederatedStatus(fedResource FederatedResource
 			return true, nil
 		}
 		klog.V(4).Infof("Updating status for %s %q", kind, name)
-		err := s.hostClusterClient.UpdateStatus(context.TODO(), obj)
+		err := s.hostClusterClient.UpdateStatus(ctx, obj)
 		if err == nil {
 			return true, nil
 		}
 		if apierrors.IsConflict(err) {
 			klog.V(2).Infof("Failed to set propagation status for %s %q due to conflict (will retry): %v.", kind, name, err)
-			err := s.hostClusterClient.Get(context.TODO(), obj, obj.GetNamespace(), obj.GetName())
+			err := s.hostClusterClient.Get(ctx, obj, obj.GetNamespace(), obj.GetName())
 			if err != nil {
 				return false, errors.Wrapf(err, "failed to retrieve resource")
 			}

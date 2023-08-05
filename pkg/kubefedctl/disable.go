@@ -280,9 +280,9 @@ func verifyPropagationControllerStopped(client genericclient.Client, typeConfigN
 	write(fmt.Sprintf("Verifying propagation controller is stopped for FederatedTypeConfig %q\n", typeConfigName))
 
 	var typeConfig *fedv1b1.FederatedTypeConfig
-	err := wait.PollImmediate(100*time.Millisecond, 10*time.Second, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), 100*time.Millisecond, 10*time.Second, true, func(ctx context.Context) (bool, error) {
 		typeConfig = &fedv1b1.FederatedTypeConfig{}
-		err := client.Get(context.TODO(), typeConfig, typeConfigName.Namespace, typeConfigName.Name)
+		err := client.Get(ctx, typeConfig, typeConfigName.Namespace, typeConfigName.Name)
 		if err != nil {
 			klog.Errorf("Error retrieving FederatedTypeConfig %q: %v", typeConfigName, err)
 			return false, nil

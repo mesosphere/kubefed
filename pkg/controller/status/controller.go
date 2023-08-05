@@ -205,7 +205,7 @@ func (s *KubeFedStatusController) Run(stopChan <-chan struct{}) {
 
 // Wait until all data stores are in sync for a definitive timeout, and returns if there is an error or a timeout.
 func (s *KubeFedStatusController) waitForSync() error {
-	return wait.PollImmediate(util.SyncedPollPeriod, s.cacheSyncTimeout, func() (bool, error) {
+	return wait.PollUntilContextTimeout(context.TODO(), util.SyncedPollPeriod, s.cacheSyncTimeout, true, func(_ context.Context) (bool, error) {
 		return s.isSynced(), nil
 	})
 }
