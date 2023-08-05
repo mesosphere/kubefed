@@ -67,7 +67,7 @@ func TestHandlers(t *testing.T) {
 			triggerChan <- obj
 		})
 
-	trigger.OnAdd(&service)
+	trigger.OnAdd(&service, false)
 	assert.True(t, triggered())
 	trigger.OnDelete(&service)
 	assert.True(t, triggeredWith(&service))
