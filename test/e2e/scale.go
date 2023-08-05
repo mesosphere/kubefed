@@ -140,9 +140,9 @@ var _ = Describe("Simulated Scale", func() {
 			// serviceaccount token recreate
 			saName := kfutil.ClusterServiceAccountName(memberCluster, hostCluster)
 			var deleteSecret sync.Once
-			err = wait.PollImmediate(1*time.Second, 10*time.Second, func() (bool, error) {
+			err = wait.PollUntilContextTimeout(context.Background(), 1*time.Second, 10*time.Second, true, func(ctx context.Context) (bool, error) {
 				sa, err := client.CoreV1().ServiceAccounts(joiningNamespace).Get(
-					context.Background(), saName, metav1.GetOptions{},
+					ctx, saName, metav1.GetOptions{},
 				)
 				if err != nil {
 					return false, nil
@@ -153,13 +153,13 @@ var _ = Describe("Simulated Scale", func() {
 					for _, objReference := range sa.Secrets {
 						saSecretName := objReference.Name
 						secret, err := client.CoreV1().Secrets(joiningNamespace).Get(
-							context.Background(), saSecretName, metav1.GetOptions{},
+							ctx, saSecretName, metav1.GetOptions{},
 						)
 						if err != nil {
 							tl.Fatalf("Error get sa secret %s: %v", saSecretName, err)
 						}
 						if secret.Type == corev1.SecretTypeServiceAccountToken {
-							if err := client.CoreV1().Secrets(joiningNamespace).Delete(context.TODO(), saSecretName, metav1.DeleteOptions{}); err != nil {
+							if err := client.CoreV1().Secrets(joiningNamespace).Delete(ctx, saSecretName, metav1.DeleteOptions{}); err != nil {
 								tl.Fatalf("Error delete secret %s: %v", secretName, err)
 							}
 						}
@@ -168,7 +168,7 @@ var _ = Describe("Simulated Scale", func() {
 				for _, objReference := range sa.Secrets {
 					saSecretName := objReference.Name
 					secret, err := client.CoreV1().Secrets(joiningNamespace).Get(
-						context.Background(), saSecretName, metav1.GetOptions{},
+						ctx, saSecretName, metav1.GetOptions{},
 					)
 					if err != nil {
 						return false, nil

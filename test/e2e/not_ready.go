@@ -163,9 +163,9 @@ var _ = Describe("[NOT_READY] Simulated not-ready nodes", func() {
 			tl.Fatalf("Failed to patch kubefed cluster: %v", err)
 		}
 
-		err = wait.Poll(time.Second*5, time.Second*30, func() (bool, error) {
+		err = wait.PollUntilContextTimeout(context.TODO(), time.Second*5, time.Second*30, true, func(ctx context.Context) (bool, error) {
 			cluster := &fedv1b1.KubeFedCluster{}
-			err := hostClient.Get(context.TODO(), cluster, hostNamespace, unhealthyCluster)
+			err := hostClient.Get(ctx, cluster, hostNamespace, unhealthyCluster)
 			if err != nil {
 				tl.Fatalf("Failed to retrieve unhealthy cluster: %v", err)
 			}

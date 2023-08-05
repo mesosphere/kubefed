@@ -52,9 +52,9 @@ func Equivalent(actual, desired runtimeclient.Object) bool {
 }
 
 // WaitForNamespace waits for namespace to be created in a cluster.
-func WaitForNamespaceOrDie(tl TestLogger, client kubeclientset.Interface, clusterName, namespace string, interval, timeout time.Duration) {
-	err := wait.PollImmediate(interval, timeout, func() (exist bool, err error) {
-		_, err = client.CoreV1().Namespaces().Get(context.Background(), namespace, metav1.GetOptions{})
+func WaitForNamespace(tl TestLogger, client kubeclientset.Interface, clusterName, namespace string, interval, timeout time.Duration) {
+	err := wait.PollUntilContextTimeout(context.Background(), interval, timeout, true, func(ctx context.Context) (exist bool, err error) {
+		_, err = client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{})
 		if errors.IsNotFound(err) {
 			return false, nil
 		}

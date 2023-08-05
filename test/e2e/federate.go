@@ -298,8 +298,8 @@ func deleteResource(tl common.TestLogger, client util.ResourceClient, qualifiedN
 		tl.Fatalf("Error deleting %s %q: %v", kind, qualifiedName, err)
 	}
 
-	err = wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
-		_, err := client.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+	err = wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
+		_, err := client.Resources(qualifiedName.Namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			return true, nil
 		}

@@ -128,8 +128,8 @@ var _ = Describe("Placement", func() {
 			if err != nil {
 				tl.Fatalf("Error creating resource client for %q: %v", targetKind, err)
 			}
-			err = wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
-				_, err := client.Resources(namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+			err = wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
+				_, err := client.Resources(namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 				if errors.IsNotFound(err) {
 					return true, nil
 				}

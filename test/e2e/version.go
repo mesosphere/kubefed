@@ -454,7 +454,7 @@ var _ = Describe("VersionManager", func() {
 })
 
 func checkForDeletion(tl common.TestLogger, typeName string, qualifiedName util.QualifiedName, checkFunc func() error) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(_ context.Context) (bool, error) {
 		err := checkFunc()
 		if errors.IsNotFound(err) {
 			return true, nil
@@ -470,9 +470,9 @@ func checkForDeletion(tl common.TestLogger, typeName string, qualifiedName util.
 }
 
 func waitForPropVer(tl common.TestLogger, adapter testVersionAdapter, client genericclient.Client, qualifiedName util.QualifiedName, expectedStatus fedv1a1.PropagatedVersionStatus) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
 		propVer := adapter.NewObject()
-		err := client.Get(context.TODO(), propVer, qualifiedName.Namespace, qualifiedName.Name)
+		err := client.Get(ctx, propVer, qualifiedName.Namespace, qualifiedName.Name)
 		if errors.IsNotFound(err) {
 			return false, nil
 		}

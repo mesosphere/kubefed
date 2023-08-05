@@ -116,8 +116,8 @@ var _ = Describe("Federated", func() {
 
 				By(fmt.Sprintf("Waiting until the status of the %s %q indicates NamespaceNotFederated", kind, qualifiedName))
 				client := genericclient.NewForConfigOrDie(f.KubeConfig())
-				err := wait.PollImmediate(framework.PollInterval, wait.ForeverTestTimeout, func() (bool, error) {
-					genericResource, err := common.GetGenericResource(client, fedObject.GroupVersionKind(), qualifiedName)
+				err := wait.PollUntilContextTimeout(context.TODO(), framework.PollInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
+					genericResource, err := common.GetGenericResource(ctx, client, fedObject.GroupVersionKind(), qualifiedName)
 					if err != nil {
 						tl.Fatalf("An error occurred retrieving the status of the %s %q: %v", kind, qualifiedName, err)
 					}
@@ -157,7 +157,7 @@ var _ = Describe("Federated", func() {
 
 				By("Waiting for the test namespace to be created in the selected cluster")
 				kubeClient := kubeclientset.NewForConfigOrDie(clusterConfig)
-				common.WaitForNamespaceOrDie(tl, kubeClient, clusterName, targetObject.GetNamespace(),
+				common.WaitForNamespace(tl, kubeClient, clusterName, targetObject.GetNamespace(),
 					framework.PollInterval, framework.TestContext.SingleCallTimeout)
 
 				By("Creating a labeled resource in the selected cluster")
@@ -175,10 +175,10 @@ var _ = Describe("Federated", func() {
 				}()
 
 				By("Checking that the labeled resource is unlabeled by the sync controller")
-				err = wait.PollImmediate(framework.PollInterval, wait.ForeverTestTimeout, func() (bool, error) {
+				err = wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 					obj := &unstructured.Unstructured{}
 					obj.SetGroupVersionKind(labeledObj.GroupVersionKind())
-					err := clusterClient.Get(context.TODO(), obj, labeledObj.GetNamespace(), labeledObj.GetName())
+					err := clusterClient.Get(ctx, obj, labeledObj.GetNamespace(), labeledObj.GetName())
 					if err != nil {
 						tl.Errorf("Error retrieving labeled resource: %v", err)
 						return false, nil
@@ -206,7 +206,7 @@ var _ = Describe("Federated", func() {
 
 				By("Waiting for the test namespace to be created in the selected cluster")
 				kubeClient := kubeclientset.NewForConfigOrDie(clusterConfig)
-				common.WaitForNamespaceOrDie(tl, kubeClient, clusterName, targetObject.GetNamespace(),
+				common.WaitForNamespace(tl, kubeClient, clusterName, targetObject.GetNamespace(),
 					framework.PollInterval, framework.TestContext.SingleCallTimeout)
 
 				By("Creating an unlabeled resource in the selected cluster")
@@ -248,10 +248,10 @@ var _ = Describe("Federated", func() {
 
 				waitDuration := 10 * time.Second // Arbitrary amount of time to wait for deletion
 				By(fmt.Sprintf("Checking that the unlabeled resource is not deleted within %v", waitDuration))
-				_ = wait.PollImmediate(framework.PollInterval, waitDuration, func() (bool, error) {
+				_ = wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, waitDuration, true, func(ctx context.Context) (bool, error) {
 					obj := &unstructured.Unstructured{}
 					obj.SetGroupVersionKind(unlabeledObj.GroupVersionKind())
-					err := clusterClient.Get(context.TODO(), obj, unlabeledObj.GetNamespace(), unlabeledObj.GetName())
+					err := clusterClient.Get(ctx, obj, unlabeledObj.GetNamespace(), unlabeledObj.GetName())
 					if apierrors.IsNotFound(err) {
 						tl.Fatalf("Unlabeled resource %s %q was deleted", typeConfig.GetTargetType().Kind, util.NewQualifiedName(unlabeledObj))
 					}

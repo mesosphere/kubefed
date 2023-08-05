@@ -56,9 +56,9 @@ func clusterIsReadyOrFail(tl common.TestLogger, client genericclient.Client,
 	if util.IsClusterReady(&cluster.Status) {
 		return
 	}
-	err := wait.Poll(interval, timeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), interval, timeout, true, func(ctx context.Context) (bool, error) {
 		cluster := &fedv1b1.KubeFedCluster{}
-		err := client.Get(context.TODO(), cluster, namespace, clusterName)
+		err := client.Get(ctx, cluster, namespace, clusterName)
 		if err != nil {
 			return false, err
 		}

@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"sort"
+	"time"
 
 	"github.com/pkg/errors"
 
@@ -188,8 +189,9 @@ func (f *UnmanagedFramework) ControllerConfig() *util.ControllerConfig {
 			KubeFedNamespace: TestContext.KubeFedSystemNamespace,
 			TargetNamespace:  f.inMemoryTargetNamespace(),
 		},
-		KubeConfig:      f.Config,
-		MinimizeLatency: true,
+		KubeConfig:       f.Config,
+		MinimizeLatency:  true,
+		CacheSyncTimeout: 15 * time.Minute,
 	}
 	controllerCfg.RawResourceStatusCollection = true
 	return controllerCfg
@@ -276,7 +278,7 @@ func (f *UnmanagedFramework) ClusterConfigs(userAgent string) map[string]common.
 		restclient.AddUserAgent(config, userAgent)
 		clusterConfigs[cluster.Name] = common.TestClusterConfig{
 			Config:    config,
-			IsPrimary: (cluster.Name == hostClusterName),
+			IsPrimary: cluster.Name == hostClusterName,
 		}
 	}
 
@@ -366,8 +368,8 @@ func DeleteNamespace(client kubeclientset.Interface, namespaceName string) {
 }
 
 func waitForNamespaceDeletion(client kubeclientset.Interface, namespace string) error {
-	err := wait.PollImmediate(PollInterval, TestContext.SingleCallTimeout, func() (bool, error) {
-		if _, err := client.CoreV1().Namespaces().Get(context.Background(), namespace, metav1.GetOptions{}); err != nil {
+	err := wait.PollUntilContextTimeout(context.Background(), PollInterval, TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
+		if _, err := client.CoreV1().Namespaces().Get(ctx, namespace, metav1.GetOptions{}); err != nil {
 			if apierrors.IsNotFound(err) {
 				return true, nil
 			}
