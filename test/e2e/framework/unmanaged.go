@@ -41,8 +41,8 @@ import (
 	"sigs.k8s.io/kubefed/pkg/features"
 	"sigs.k8s.io/kubefed/test/common"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
-	. "github.com/onsi/gomega" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
+	. "github.com/onsi/gomega"    //nolint:stylecheck
 )
 
 const (
@@ -134,7 +134,7 @@ func NewUnmanagedFramework(baseName string) KubeFedFrameworkImpl {
 // BeforeEach reads the cluster configuration if it has not yet been read.
 func (f *UnmanagedFramework) BeforeEach() {
 	// The fact that we need this feels like a bug in ginkgo.
-	// https://github.com/onsi/ginkgo/issues/222
+	// https://github.com/onsi/ginkgo/v2issues/222
 	f.cleanupHandle = AddCleanupAction(f.AfterEach)
 
 	if f.Config == nil {

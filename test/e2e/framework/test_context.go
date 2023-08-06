@@ -57,7 +57,7 @@ func (t *TestContextType) NamespaceScopedControlPlane() bool {
 var TestContext = &TestContextType{}
 
 func registerFlags(t *TestContextType) {
-	flag.BoolVar(&t.InMemoryControllers, "in-memory-controllers", false,
+	flag.BoolVar(&t.InMemoryControllers, "in-memory-controllers", true,
 		"Whether KubeFed controllers should be started in memory.")
 	flag.StringVar(&t.KubeConfig, "kubeconfig", os.Getenv("KUBECONFIG"),
 		"Path to kubeconfig containing embedded authinfo.")

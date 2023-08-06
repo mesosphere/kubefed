@@ -9,8 +9,8 @@ import (
 	"sigs.k8s.io/kubefed/pkg/controller/util"
 	"sigs.k8s.io/kubefed/test/e2e/framework"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
-	. "github.com/onsi/gomega" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
+	. "github.com/onsi/gomega"    //nolint:stylecheck
 )
 
 var _ = Describe("KubeFedCluster", func() {

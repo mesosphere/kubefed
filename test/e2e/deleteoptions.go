@@ -17,7 +17,7 @@ limitations under the License.
 package e2e
 
 import (
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 

@@ -24,8 +24,7 @@ import (
 	"sigs.k8s.io/kubefed/test/e2e/framework"
 	"sigs.k8s.io/kubefed/test/e2e/framework/ginkgowrapper"
 
-	"github.com/onsi/ginkgo"
-	"github.com/onsi/ginkgo/config"
+	"github.com/onsi/ginkgo/v2"
 	"github.com/onsi/gomega"
 )
 
