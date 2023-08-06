@@ -19,22 +19,21 @@ package e2e
 import (
 	"testing"
 
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
+	. "github.com/onsi/gomega"    //nolint:stylecheck
 	"k8s.io/klog/v2"
 
 	"sigs.k8s.io/kubefed/test/e2e/framework"
-	"sigs.k8s.io/kubefed/test/e2e/framework/ginkgowrapper"
-
-	"github.com/onsi/ginkgo/v2"
-	"github.com/onsi/gomega"
 )
 
 // RunE2ETests checks configuration parameters (specified through flags) and then runs
 // E2E tests using the Ginkgo runner.
 // This function is called on each Ginkgo node in parallel mode.
 func RunE2ETests(t *testing.T) {
-	gomega.RegisterFailHandler(ginkgowrapper.Fail)
-	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, config.GinkgoConfig.ParallelNode)
-	ginkgo.RunSpecs(t, "KubeFed e2e suite")
+	RegisterFailHandler(Fail)
+	config, _ := GinkgoConfiguration()
+	klog.Infof("Starting e2e run %q on Ginkgo node %d", framework.RunID, config.ParallelHost)
+	RunSpecs(t, "KubeFed e2e suite")
 }
 
 // There are certain operations we only want to run once per overall test invocation
@@ -45,7 +44,7 @@ func RunE2ETests(t *testing.T) {
 // This function takes two parameters: one function which runs on only the first Ginkgo node,
 // returning an opaque byte array, and then a second function which runs on all Ginkgo nodes,
 // accepting the byte array.
-var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
+var _ = SynchronizedBeforeSuite(func() []byte {
 	// Run only on Ginkgo node 1
 
 	// Some tests require simulated federation and will initialize an
@@ -74,7 +73,7 @@ var _ = ginkgo.SynchronizedBeforeSuite(func() []byte {
 // Similar to SynchornizedBeforeSuite, we want to run some operations only once (such as collecting cluster logs).
 // Here, the order of functions is reversed; first, the function which runs everywhere,
 // and then the function that only runs on the first Ginkgo node.
-var _ = ginkgo.SynchronizedAfterSuite(func() {
+var _ = SynchronizedAfterSuite(func() {
 	// Run on all Ginkgo nodes
 	framework.Logf("Running AfterSuite actions on all node")
 	framework.RunCleanupActions()
