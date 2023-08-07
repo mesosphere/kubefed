@@ -274,10 +274,10 @@ func (c *FederatedTypeCrudTester) CheckDelete(fedObject *unstructured.Unstructur
 
 	if orphanDependents {
 		orphanKey := util.OrphanManagedResourcesAnnotation
-		err := wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
+		err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 			var err error
 			if fedObject == nil {
-				fedObject, err = client.Resources(namespace).Get(context.Background(), name, metav1.GetOptions{})
+				fedObject, err = client.Resources(namespace).Get(ctx, name, metav1.GetOptions{})
 				if err != nil {
 					c.tl.Logf("Error retrieving %s %q to add the %q annotation: %v", federatedKind, qualifiedName, orphanKey, err)
 					return false, nil
@@ -287,7 +287,7 @@ func (c *FederatedTypeCrudTester) CheckDelete(fedObject *unstructured.Unstructur
 				return true, nil
 			}
 			util.EnableOrphaning(fedObject)
-			fedObject, err = client.Resources(namespace).Update(context.Background(), fedObject, metav1.UpdateOptions{})
+			fedObject, err = client.Resources(namespace).Update(ctx, fedObject, metav1.UpdateOptions{})
 			if err == nil {
 				return true, nil
 			}
@@ -317,8 +317,8 @@ func (c *FederatedTypeCrudTester) CheckDelete(fedObject *unstructured.Unstructur
 
 	// Wait for deletion.  The federated resource will only be removed once managed resources have
 	// been deleted or orphaned.
-	err = wait.PollImmediate(c.waitInterval, waitTimeout, func() (bool, error) {
-		_, err := client.Resources(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	err = wait.PollUntilContextTimeout(context.Background(), c.waitInterval, waitTimeout, true, func(ctx context.Context) (bool, error) {
+		_, err := client.Resources(namespace).Get(ctx, name, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			return true, nil
 		}
@@ -349,8 +349,8 @@ func (c *FederatedTypeCrudTester) CheckDelete(fedObject *unstructured.Unstructur
 			continue
 		}
 		namespace = util.QualifiedNameForCluster(clusterName, qualifiedName).Namespace
-		err = wait.PollImmediate(c.waitInterval, waitTimeout, func() (bool, error) {
-			obj, err := testCluster.Client.Resources(namespace).Get(context.Background(), name, metav1.GetOptions{})
+		err = wait.PollUntilContextTimeout(context.Background(), c.waitInterval, waitTimeout, true, func(ctx context.Context) (bool, error) {
+			obj, err := testCluster.Client.Resources(namespace).Get(ctx, name, metav1.GetOptions{})
 			switch {
 			case !deletingInCluster && apierrors.IsNotFound(err):
 				return false, errors.Errorf("%s %q was unexpectedly deleted from cluster %q", targetKind, qualifiedName, clusterName)
@@ -405,16 +405,16 @@ func (c *FederatedTypeCrudTester) CheckReplicaSet(fedObject *unstructured.Unstru
 		clusterConfig := c.testClusters[clusterName].Config
 
 		kubeClient := kubeclientset.NewForConfigOrDie(clusterConfig)
-		WaitForNamespaceOrDie(c.tl, kubeClient, clusterName, fedObject.GetNamespace(),
+		WaitForNamespace(c.tl, kubeClient, clusterName, fedObject.GetNamespace(),
 			c.waitInterval, 30*time.Second)
 
 		clusterClient := genericclient.NewForConfigOrDie(clusterConfig)
 
 		c.tl.Log("Checking that the ReplicaSet still exists in every cluster")
 
-		err := wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
+		err := wait.PollUntilContextTimeout(context.TODO(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 			objList := &appsv1.ReplicaSetList{}
-			err := clusterClient.List(context.TODO(), objList, fedObject.GetNamespace(), matchingLabels)
+			err := clusterClient.List(ctx, objList, fedObject.GetNamespace(), matchingLabels)
 			if err != nil {
 				return false, errors.Errorf("Error retrieving ReplicatSet: %v", err)
 			}
@@ -502,10 +502,9 @@ func (c *FederatedTypeCrudTester) CheckPropagation(fedObject *unstructured.Unstr
 				version, _ := c.expectedVersion(qualifiedName, templateVersion, overrideVersion, clusterName)
 				return version
 			})
-			switch {
-			case err == wait.ErrWaitTimeout:
+			if wait.Interrupted(err) {
 				c.tl.Fatalf("Timeout verifying %s %q in cluster %q: %v", targetKind, targetName, clusterName, err)
-			case err != nil:
+			} else if err != nil {
 				c.tl.Fatalf("Failed to verify %s %q in cluster %q: %v", targetKind, targetName, clusterName, err)
 			}
 		case c.targetIsNamespace && clusterName == primaryClusterName:
@@ -517,12 +516,11 @@ func (c *FederatedTypeCrudTester) CheckPropagation(fedObject *unstructured.Unstr
 			})
 			// Once resource deletion is complete, wait for the status to reflect the deletion
 
-			switch {
-			case err == wait.ErrWaitTimeout:
+			if wait.Interrupted(err) {
 				if objExpected {
 					c.tl.Fatalf("Timeout verifying deletion of %s %q in cluster %q: %v", targetKind, targetName, clusterName, err)
 				}
-			case err != nil:
+			} else if err != nil {
 				c.tl.Fatalf("Failed to verify deletion of %s %q in cluster %q: %v", targetKind, targetName, clusterName, err)
 			}
 		}
@@ -530,8 +528,8 @@ func (c *FederatedTypeCrudTester) CheckPropagation(fedObject *unstructured.Unstr
 		// Use a longer wait interval to avoid spamming the test log.
 		waitInterval := 1 * time.Second
 		var waitingForError error
-		err := wait.PollImmediate(waitInterval, c.clusterWaitTimeout, func() (bool, error) {
-			ok, err := c.checkFederatedStatus(fedObject, clusterName, objExpected)
+		err := wait.PollUntilContextTimeout(context.TODO(), waitInterval, c.clusterWaitTimeout, true, func(ctx context.Context) (bool, error) {
+			ok, err := c.checkFederatedStatus(ctx, fedObject, clusterName, objExpected)
 			if err != nil {
 				// Logging lots of waiting messages would clutter the
 				// logs.  Instead, track the most recent message
@@ -555,13 +553,13 @@ func (c *FederatedTypeCrudTester) CheckPropagation(fedObject *unstructured.Unstr
 
 // checkFederatedStatus ensures that the federated resource status
 // reflects the expected propagation state.
-func (c *FederatedTypeCrudTester) checkFederatedStatus(fedObject *unstructured.Unstructured, clusterName string, objExpected bool) (bool, error) {
+func (c *FederatedTypeCrudTester) checkFederatedStatus(ctx context.Context, fedObject *unstructured.Unstructured, clusterName string, objExpected bool) (bool, error) {
 	federatedKind := fedObject.GetKind()
 	qualifiedName := util.NewQualifiedName(fedObject)
 
 	// Retrieve the resource from the API to ensure the latest status
 	// is considered.
-	resource, err := GetGenericResource(c.client, fedObject.GroupVersionKind(), qualifiedName)
+	resource, err := GetGenericResource(ctx, c.client, fedObject.GroupVersionKind(), qualifiedName)
 	if err != nil {
 		return false, err
 	}
@@ -620,8 +618,8 @@ func (c *FederatedTypeCrudTester) checkHostNamespaceUnlabeled(client util.Resour
 	// A namespace in the host cluster should end up unlabeled instead of
 	// deleted when it is not targeted by placement.
 
-	err := wait.PollImmediate(c.waitInterval, c.clusterWaitTimeout, func() (bool, error) {
-		hostNamespace, err := client.Resources("").Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+	err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, c.clusterWaitTimeout, true, func(ctx context.Context) (bool, error) {
+		hostNamespace, err := client.Resources("").Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 		if err != nil {
 			c.tl.Errorf("Error retrieving %s %q in host cluster %q: %v", targetKind, qualifiedName, clusterName, err)
 			return false, nil
@@ -635,13 +633,13 @@ func (c *FederatedTypeCrudTester) checkHostNamespaceUnlabeled(client util.Resour
 }
 
 func (c *FederatedTypeCrudTester) waitForResource(client util.ResourceClient, qualifiedName util.QualifiedName, expectedOverrides util.ClusterOverrides, expectedVersionFunc func() string) error {
-	err := wait.PollImmediate(c.waitInterval, c.clusterWaitTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, c.clusterWaitTimeout, true, func(ctx context.Context) (bool, error) {
 		expectedVersion := expectedVersionFunc()
 		if len(expectedVersion) == 0 {
 			return false, nil
 		}
 
-		clusterObj, err := client.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+		clusterObj, err := client.Resources(qualifiedName.Namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 		if err == nil && util.ObjectVersion(clusterObj) == expectedVersion {
 			// Validate that the resource has been labeled properly,
 			// indicating creation or adoption by the sync controller.  This
@@ -699,8 +697,8 @@ func (c *FederatedTypeCrudTester) TestClusters() map[string]TestCluster {
 }
 
 func (c *FederatedTypeCrudTester) waitForResourceDeletion(client util.ResourceClient, qualifiedName util.QualifiedName, versionRemoved func() bool) error {
-	err := wait.PollImmediate(c.waitInterval, c.clusterWaitTimeout, func() (bool, error) {
-		_, err := client.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+	err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, c.clusterWaitTimeout, true, func(ctx context.Context) (bool, error) {
+		_, err := client.Resources(qualifiedName.Namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			if !versionRemoved() {
 				c.tl.Logf("Removal of %q %s successful, but propagated version still exists", c.typeConfig.GetTargetType().Kind, qualifiedName)
@@ -719,22 +717,22 @@ func (c *FederatedTypeCrudTester) waitForResourceDeletion(client util.ResourceCl
 func (c *FederatedTypeCrudTester) updateObject(apiResource metav1.APIResource, obj *unstructured.Unstructured, mutateResourceFunc func(*unstructured.Unstructured)) (*unstructured.Unstructured, error) {
 	client := c.resourceClient(apiResource)
 	var updatedObj *unstructured.Unstructured
-	err := wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 		mutateResourceFunc(obj)
 
 		var err error
-		updatedObj, err = client.Resources(obj.GetNamespace()).Update(context.Background(), obj, metav1.UpdateOptions{})
+		updatedObj, err = client.Resources(obj.GetNamespace()).Update(ctx, obj, metav1.UpdateOptions{})
 		if apierrors.IsConflict(err) {
 			// The resource was updated by the KubeFed controller.
 			// Get the latest version and retry.
-			obj, err = client.Resources(obj.GetNamespace()).Get(context.Background(), obj.GetName(), metav1.GetOptions{})
+			obj, err = client.Resources(obj.GetNamespace()).Get(ctx, obj.GetName(), metav1.GetOptions{})
 			return false, err
 		}
 		// Be tolerant of a slow server
 		if apierrors.IsServerTimeout(err) {
 			return false, nil
 		}
-		return (err == nil), err
+		return err == nil, err
 	})
 	return updatedObj, err
 }
@@ -753,9 +751,9 @@ func (c *FederatedTypeCrudTester) expectedVersion(qualifiedName util.QualifiedNa
 	loggedWaiting := false
 	adapter := versionmanager.NewVersionAdapter(c.typeConfig.GetFederatedNamespaced())
 	var version *fedv1a1.PropagatedVersionStatus
-	err := wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 		versionObj := adapter.NewObject()
-		err := c.client.Get(context.TODO(), versionObj, versionName.Namespace, versionName.Name)
+		err := c.client.Get(ctx, versionObj, versionName.Namespace, versionName.Name)
 		if apierrors.IsNotFound(err) {
 			if !loggedWaiting {
 				loggedWaiting = true
@@ -821,7 +819,7 @@ func (c *FederatedTypeCrudTester) CheckRemoteStatus(fedObject *unstructured.Unst
 		clusterConfig := c.testClusters[clusterName].Config
 
 		kubeClient := kubeclientset.NewForConfigOrDie(clusterConfig)
-		WaitForNamespaceOrDie(c.tl, kubeClient, clusterName, targetObject.GetNamespace(),
+		WaitForNamespace(c.tl, kubeClient, clusterName, targetObject.GetNamespace(),
 			c.waitInterval, 30*time.Second)
 
 		util.AddManagedLabel(targetObject)
@@ -834,10 +832,10 @@ func (c *FederatedTypeCrudTester) CheckRemoteStatus(fedObject *unstructured.Unst
 
 		c.tl.Log("Checking that the resource has status")
 		var objStatus interface{}
-		err = wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
+		err = wait.PollUntilContextTimeout(context.TODO(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
 			obj := &unstructured.Unstructured{}
 			obj.SetGroupVersionKind(labeledObj.GroupVersionKind())
-			err := clusterClient.Get(context.TODO(), obj, labeledObj.GetNamespace(), labeledObj.GetName())
+			err := clusterClient.Get(ctx, obj, labeledObj.GetNamespace(), labeledObj.GetName())
 			if err != nil {
 				c.tl.Errorf("Error retrieving kubefed cluster object resource: %v", err)
 				return false, nil
@@ -845,7 +843,7 @@ func (c *FederatedTypeCrudTester) CheckRemoteStatus(fedObject *unstructured.Unst
 
 			objStatus = obj.Object[util.StatusField]
 			c.tl.Logf("Show kubefed cluster object status: %v", objStatus)
-			return (obj.Object[util.StatusField] != nil), nil
+			return obj.Object[util.StatusField] != nil, nil
 		})
 		if err != nil {
 			c.tl.Fatal("Timed out waiting for the resource to have a status field")
@@ -877,8 +875,8 @@ func (c *FederatedTypeCrudTester) getRemoteStatus(fedObject *unstructured.Unstru
 	var remoteStatusObj interface{}
 	// The default is normally 30 seconds
 	waitTimeout := 6 * wait.ForeverTestTimeout
-	err := wait.PollImmediate(c.waitInterval, waitTimeout, func() (bool, error) {
-		fedObj, err := client.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+	err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, waitTimeout, true, func(ctx context.Context) (bool, error) {
+		fedObj, err := client.Resources(qualifiedName.Namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 		if err != nil {
 			c.tl.Errorf("An unexpected error occurred while polling for remote status: %v", err)
 			return false, nil
@@ -928,12 +926,12 @@ func (c *FederatedTypeCrudTester) CheckStatusCreated(qualifiedName util.Qualifie
 		c.tl.Logf("Checking creation of %s %q", statusKind, qualifiedName)
 
 		client := c.resourceClient(*statusAPIResource)
-		err := wait.PollImmediate(c.waitInterval, wait.ForeverTestTimeout, func() (bool, error) {
-			_, err := client.Resources(qualifiedName.Namespace).Get(context.Background(), qualifiedName.Name, metav1.GetOptions{})
+		err := wait.PollUntilContextTimeout(context.Background(), c.waitInterval, wait.ForeverTestTimeout, true, func(ctx context.Context) (bool, error) {
+			_, err := client.Resources(qualifiedName.Namespace).Get(ctx, qualifiedName.Name, metav1.GetOptions{})
 			if err != nil && !apierrors.IsNotFound(err) {
 				c.tl.Errorf("An unexpected error occurred while polling for desired status: %v", err)
 			}
-			return (err == nil), nil
+			return err == nil, nil
 		})
 
 		if err != nil {
@@ -944,11 +942,10 @@ func (c *FederatedTypeCrudTester) CheckStatusCreated(qualifiedName util.Qualifie
 
 // GetGenericResource retrieves a federated resource and converts it to
 // the generic resource struct.
-func GetGenericResource(client genericclient.Client, gvk schema.GroupVersionKind,
-	qualifiedName util.QualifiedName) (*status.GenericFederatedResource, error) {
+func GetGenericResource(ctx context.Context, client genericclient.Client, gvk schema.GroupVersionKind, qualifiedName util.QualifiedName) (*status.GenericFederatedResource, error) {
 	fedObject := &unstructured.Unstructured{}
 	fedObject.SetGroupVersionKind(gvk)
-	err := client.Get(context.TODO(), fedObject, qualifiedName.Namespace, qualifiedName.Name)
+	err := client.Get(ctx, fedObject, qualifiedName.Namespace, qualifiedName.Name)
 	if err != nil {
 		return nil, errors.Wrapf(err, "Failed to retrieve federated resource from the API")
 	}

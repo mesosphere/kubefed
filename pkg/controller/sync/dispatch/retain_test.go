@@ -21,7 +21,7 @@ import (
 	"testing"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 
 	"sigs.k8s.io/kubefed/pkg/controller/util"
 )
@@ -150,7 +150,7 @@ func TestRetainHealthCheckNodePortInServiceFields(t *testing.T) {
 				},
 			},
 			true,
-			pointer.Int64(1000),
+			ptr.To[int64](1000),
 		},
 	}
 	for _, test := range tests {
@@ -223,7 +223,7 @@ func TestRetainClusterIPsInServiceFields(t *testing.T) {
 				},
 			},
 			true,
-			pointer.String("1.2.3.4"),
+			ptr.To("1.2.3.4"),
 			nil,
 		},
 		{
@@ -256,7 +256,7 @@ func TestRetainClusterIPsInServiceFields(t *testing.T) {
 				},
 			},
 			true,
-			pointer.String("1.2.3.4"),
+			ptr.To("1.2.3.4"),
 			[]string{"5.6.7.8", "9.10.11.12"},
 		},
 	}

@@ -17,6 +17,8 @@ limitations under the License.
 package e2e
 
 import (
+	"context"
+
 	"k8s.io/apimachinery/pkg/util/wait"
 	restclient "k8s.io/client-go/rest"
 
@@ -111,7 +113,7 @@ func GetSchedulingTypes(tl common.TestLogger) map[string]schedulingtypes.Schedul
 }
 
 func waitForSchedulerDeleted(tl common.TestLogger, controller *schedulingmanager.SchedulingManager) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(_ context.Context) (bool, error) {
 		scheduler := controller.GetScheduler(schedulingtypes.RSPKind)
 		if scheduler != nil {
 			return false, nil
@@ -125,7 +127,7 @@ func waitForSchedulerDeleted(tl common.TestLogger, controller *schedulingmanager
 }
 
 func waitForSchedulerStarted(tl common.TestLogger, controller *schedulingmanager.SchedulingManager, schedulingTypes map[string]schedulingtypes.SchedulerFactory) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(_ context.Context) (bool, error) {
 		scheduler := controller.GetScheduler(schedulingtypes.RSPKind)
 		if scheduler == nil {
 			return false, nil

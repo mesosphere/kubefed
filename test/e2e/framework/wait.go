@@ -18,6 +18,7 @@ package framework
 
 import (
 	"bufio"
+	"context"
 	"io"
 	"strings"
 	"time"
@@ -34,7 +35,7 @@ func WaitForObject(tl common.TestLogger, namespace, name string, objectGetter fu
 	var actual runtimeclient.Object
 	interval := PollInterval
 	timeout := TestContext.SingleCallTimeout
-	err := wait.PollImmediate(interval, timeout, func() (exist bool, err error) {
+	err := wait.PollUntilContextTimeout(context.Background(), interval, timeout, true, func(ctx context.Context) (exist bool, err error) {
 		actual, err = objectGetter(namespace, name)
 		if err != nil {
 			if apierrors.IsNotFound(err) {

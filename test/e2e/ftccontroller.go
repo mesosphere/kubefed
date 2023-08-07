@@ -178,12 +178,12 @@ func enableResource(f framework.KubeFedFramework, targetAPIResource *metav1.APIR
 }
 
 func waitForTargetCrd(tl common.TestLogger, config *rest.Config, targetName, version string) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
 		_, err := kfenable.LookupAPIResource(config, targetName, version)
 		if err != nil {
 			tl.Logf("An error was reported while waiting for target type %q to be published as an available resource: %v", targetName, err)
 		}
-		return (err == nil), nil
+		return err == nil, nil
 	})
 	if err != nil {
 		tl.Fatalf("Timed out waiting for target type %q to be published as an available resource", targetName)
@@ -192,9 +192,9 @@ func waitForTargetCrd(tl common.TestLogger, config *rest.Config, targetName, ver
 
 // waitForGenerationSynced indicates that sync controller is updated
 func waitForGenerationSynced(tl common.TestLogger, client genericclient.Client, namespace, name string) {
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
 		ftc := fedv1b1.FederatedTypeConfig{}
-		err := client.Get(context.TODO(), &ftc, namespace, name)
+		err := client.Get(ctx, &ftc, namespace, name)
 		if err != nil {
 			tl.Fatalf("Error retrieving status of FederatedTypeConfig %q: %v", util.QualifiedName{Namespace: namespace, Name: name}, err)
 		}

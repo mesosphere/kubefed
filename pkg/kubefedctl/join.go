@@ -25,7 +25,6 @@ import (
 	"time"
 
 	"github.com/pkg/errors"
-
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	corev1 "k8s.io/api/core/v1"
@@ -37,7 +36,7 @@ import (
 	kubeclient "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog/v2"
-	"k8s.io/utils/pointer"
+	"k8s.io/utils/ptr"
 	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 
 	fedv1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
@@ -503,7 +502,7 @@ func createServiceAccount(clusterClientset kubeclient.Interface, namespace,
 				"kubernetes.io/enforce-mountable-secrets": "true",
 			},
 		},
-		AutomountServiceAccountToken: pointer.Bool(false),
+		AutomountServiceAccountToken: ptr.To(false),
 	}
 
 	if dryRun {
@@ -896,9 +895,9 @@ func populateSecretInHostCluster(clusterClientset, hostClientset kubeclient.Inte
 	// Get the secret from the joining cluster.
 	var secret *corev1.Secret
 
-	err := wait.PollImmediate(1*time.Second, serviceAccountSecretTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.TODO(), 1*time.Second, serviceAccountSecretTimeout, true, func(ctx context.Context) (bool, error) {
 		joiningClusterSASecret, err := clusterClientset.CoreV1().Secrets(joiningNamespace).Get(
-			context.Background(), saTokenSecretName, metav1.GetOptions{},
+			ctx, saTokenSecretName, metav1.GetOptions{},
 		)
 		if err != nil {
 			return false, nil

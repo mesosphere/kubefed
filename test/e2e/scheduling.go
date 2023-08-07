@@ -299,8 +299,8 @@ func waitForMatchingFederatedObject(tl common.TestLogger, typeConfig typeconfig.
 
 	expected64 := int32MapToInt64(expected32)
 
-	return wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
-		fedObject, err := client.Resources(namespace).Get(context.Background(), name, metav1.GetOptions{})
+	return wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
+		fedObject, err := client.Resources(namespace).Get(ctx, name, metav1.GetOptions{})
 		if err != nil {
 			if !apierrors.IsNotFound(err) {
 				tl.Errorf("An error occurred while polling for %s %s/%s: %v", kind, namespace, name, err)
@@ -348,8 +348,8 @@ func updateClusterLabel(tl common.TestLogger, client genericclient.Client, kubef
 		Version: fedv1b1.SchemeGroupVersion.Version,
 	})
 	// We retry couple of times on conflict
-	err := wait.PollImmediate(1*time.Second, 10*time.Second, func() (bool, error) {
-		err := client.Get(context.Background(), fedCluster, kubefedNamespace, clusterName)
+	err := wait.PollUntilContextTimeout(context.Background(), 1*time.Second, 10*time.Second, true, func(ctx context.Context) (bool, error) {
+		err := client.Get(ctx, fedCluster, kubefedNamespace, clusterName)
 		if err != nil {
 			tl.Fatalf("Cannot get KubeFedCluster %q from namespace %q: %v", clusterName, kubefedNamespace, err)
 		}
@@ -359,7 +359,7 @@ func updateClusterLabel(tl common.TestLogger, client genericclient.Client, kubef
 		} else {
 			removeLabel(fedCluster, "foo", "bar")
 		}
-		err = client.Update(context.TODO(), fedCluster)
+		err = client.Update(ctx, fedCluster)
 		if err == nil {
 			return true, nil
 		}

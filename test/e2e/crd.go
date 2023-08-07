@@ -127,12 +127,12 @@ func validateCrdCrud(f framework.KubeFedFramework, targetCrdKind string, namespa
 	}
 
 	targetName := targetAPIResource.Name
-	err := wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
+	err := wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(_ context.Context) (bool, error) {
 		_, err := kfenable.LookupAPIResource(hostConfig, targetName, targetAPIResource.Version)
 		if err != nil {
 			tl.Logf("An error was reported while waiting for target type %q to be published as an available resource: %v", targetName, err)
 		}
-		return (err == nil), nil
+		return err == nil, nil
 	})
 	if err != nil {
 		tl.Fatalf("Timed out waiting for target type %q to be published as an available resource", targetName)
@@ -239,12 +239,12 @@ func waitForCrd(config *rest.Config, tl common.TestLogger, apiResource metav1.AP
 	if err != nil {
 		tl.Fatalf("Error creating client for crd %q: %v", apiResource.Kind, err)
 	}
-	err = wait.PollImmediate(framework.PollInterval, framework.TestContext.SingleCallTimeout, func() (bool, error) {
-		_, err := client.Resources("invalid").Get(context.Background(), "invalid", metav1.GetOptions{})
+	err = wait.PollUntilContextTimeout(context.Background(), framework.PollInterval, framework.TestContext.SingleCallTimeout, true, func(ctx context.Context) (bool, error) {
+		_, err := client.Resources("invalid").Get(ctx, "invalid", metav1.GetOptions{})
 		if apierrors.IsNotFound(err) {
 			return true, nil
 		}
-		return (err == nil), err
+		return err == nil, err
 	})
 	if err != nil {
 		tl.Fatalf("Error waiting for crd %q to become established: %v", apiResource.Kind, err)
