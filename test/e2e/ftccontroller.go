@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
 	"github.com/pborman/uuid"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
 	apiextv1client "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1"

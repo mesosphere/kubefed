@@ -37,7 +37,7 @@ import (
 	"sigs.k8s.io/kubefed/test/common"
 	"sigs.k8s.io/kubefed/test/e2e/framework"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
 )
 
 var containedTypeNames = []string{"jobs.batch", "deployments.apps", "replicasets.apps"}

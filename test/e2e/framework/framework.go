@@ -35,8 +35,8 @@ import (
 	"sigs.k8s.io/kubefed/pkg/controller/util"
 	"sigs.k8s.io/kubefed/test/common"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
-	. "github.com/onsi/gomega" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
+	. "github.com/onsi/gomega"    //nolint:stylecheck
 )
 
 // TODO(marun) Replace the framework with the unmanaged

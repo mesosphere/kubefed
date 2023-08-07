@@ -22,7 +22,7 @@ import (
 	"testing"
 	"time"
 
-	. "github.com/onsi/ginkgo"
+	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
 	corev1 "k8s.io/api/core/v1"
@@ -53,7 +53,7 @@ var cc *ClusterController
 var stopControllerCh chan struct{}
 var config *util.ClusterHealthCheckConfig
 
-var _ = BeforeSuite(func(done Done) {
+var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
 	testenv = &envtest.Environment{
@@ -109,9 +109,7 @@ var _ = BeforeSuite(func(done Done) {
 	Expect(err).ToNot(HaveOccurred())
 
 	cc.Run(stopControllerCh)
-
-	close(done)
-}, 60)
+})
 
 var _ = AfterSuite(func() {
 	close(stopControllerCh)

@@ -20,12 +20,11 @@ import (
 	"fmt"
 	"time"
 
-	. "github.com/onsi/ginkgo" //nolint:stylecheck
-	. "github.com/onsi/gomega" //nolint:stylecheck
+	. "github.com/onsi/ginkgo/v2" //nolint:stylecheck
+	. "github.com/onsi/gomega"    //nolint:stylecheck
 	"github.com/pborman/uuid"
 
 	"sigs.k8s.io/kubefed/test/common"
-	"sigs.k8s.io/kubefed/test/e2e/framework/ginkgowrapper"
 )
 
 const (
@@ -65,13 +64,13 @@ func Failf(format string, args ...interface{}) {
 func FailfWithOffset(offset int, format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	log("INFO", msg)
-	ginkgowrapper.Fail(nowStamp()+": "+msg, 1+offset)
+	Fail(nowStamp()+": "+msg, 1+offset)
 }
 
 func Skipf(format string, args ...interface{}) {
 	msg := fmt.Sprintf(format, args...)
 	log("INFO", msg)
-	ginkgowrapper.Skip(nowStamp() + ": " + msg)
+	Skip(nowStamp() + ": " + msg)
 }
 
 func ExpectNoError(err error, explain ...interface{}) {
