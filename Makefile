@@ -53,7 +53,7 @@ endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
 # .github/workflows files.
-BUILD_IMAGE ?= golang:1.20.2
+BUILD_IMAGE ?= golang:1.21.5
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
@@ -64,7 +64,8 @@ E2E_BINARY_TARGET = bin/e2e
 LDFLAG_OPTIONS = -ldflags "-X sigs.k8s.io/kubefed/pkg/version.version=$(GIT_VERSION) \
                       -X sigs.k8s.io/kubefed/pkg/version.gitCommit=$(GIT_HASH) \
                       -X sigs.k8s.io/kubefed/pkg/version.gitTreeState=$(GIT_TREESTATE) \
-                      -X sigs.k8s.io/kubefed/pkg/version.buildDate=$(BUILDDATE)"
+                      -X sigs.k8s.io/kubefed/pkg/version.buildDate=$(BUILDDATE) \
+                      -s -w"
 
 export GOPATH ?= $(shell go env GOPATH)
 GO_BUILDCMD = CGO_ENABLED=0 go build $(VERBOSE_FLAG) $(LDFLAG_OPTIONS)
