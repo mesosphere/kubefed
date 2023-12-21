@@ -12,7 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-SHELL := /bin/bash
+# This is compatible with Darwin, see https://itnext.io/upgrading-bash-on-macos-7138bd1066ba
+SHELL := /usr/bin/env bash
+.SHELLFLAGS = -euo pipefail -c
+# We need to explicitly get the bash version via shell command here because the user could be
+# running a different shell and hence BASH_VERSION var will not be set in the Make environment.
+BASH_VERSION := $(shell echo $${BASH_VERSION})
+ifneq (5, $(word 1, $(sort 5 $(BASH_VERSION))))
+  $(error Only bash >= 5 is supported (current version: $(BASH_VERSION)). Please upgrade your version of bash. If on macOS, see https://formulae.brew.sh/formula/bash)
+endif
+
 TARGET = kubefed
 GOTARGET = sigs.k8s.io/$(TARGET)
 REGISTRY ?= ghcr.io/mesosphere
@@ -44,7 +53,7 @@ endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
 # .github/workflows files.
-BUILD_IMAGE ?= golang:1.20.2
+BUILD_IMAGE ?= golang:1.21.5
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
@@ -55,7 +64,8 @@ E2E_BINARY_TARGET = bin/e2e
 LDFLAG_OPTIONS = -ldflags "-X sigs.k8s.io/kubefed/pkg/version.version=$(GIT_VERSION) \
                       -X sigs.k8s.io/kubefed/pkg/version.gitCommit=$(GIT_HASH) \
                       -X sigs.k8s.io/kubefed/pkg/version.gitTreeState=$(GIT_TREESTATE) \
-                      -X sigs.k8s.io/kubefed/pkg/version.buildDate=$(BUILDDATE)"
+                      -X sigs.k8s.io/kubefed/pkg/version.buildDate=$(BUILDDATE) \
+                      -s -w"
 
 export GOPATH ?= $(shell go env GOPATH)
 GO_BUILDCMD = CGO_ENABLED=0 go build $(VERBOSE_FLAG) $(LDFLAG_OPTIONS)
@@ -77,7 +87,7 @@ all: container hyperfed controller kubefedctl webhook e2e
 # Unit tests
 test:
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-	source <(setup-envtest use -p env 1.24.x) && \
+	source <(setup-envtest use -p env 1.28.x) && \
 		go test $(TEST_PKGS)
 
 build: hyperfed controller kubefedctl webhook
@@ -86,9 +96,16 @@ lint:
 	golangci-lint run -c .golangci.yml --fix
 
 container: $(HYPERFED_TARGET)-linux-$(HOST_ARCH)
-	cp -f $(HYPERFED_TARGET)-linux-$(HOST_ARCH) images/kubefed/hyperfed
-	$(DOCKER) build images/kubefed -t $(IMAGE_NAME)
-	rm -f images/kubefed/hyperfed
+	@tmpdir=`mktemp --tmpdir -d`; \
+	trap 'rm -rf "$$tmpdir"' EXIT; \
+	cp $(HYPERFED_TARGET)-linux-$(HOST_ARCH) $$tmpdir/hyperfed; \
+	cp images/kubefed/Dockerfile $$tmpdir; \
+	pushd $$tmpdir &>/dev/null; \
+	ln -s hyperfed controller-manager; \
+	ln -s hyperfed kubefedctl; \
+	ln -s hyperfed webhook; \
+	popd &>/dev/null; \
+	$(DOCKER) build $$tmpdir -t $(IMAGE_NAME)
 
 bindir:
 	mkdir -p $(BIN_DIR)

@@ -188,7 +188,7 @@ run-unit-tests
 echo "Downloading e2e test dependencies"
 ./scripts/download-e2e-binaries.sh
 
-KIND_TAG="v1.24.2@sha256:1f0cee2282f43150b52dc7933183ed96abdcfc8d293f30ec07082495874876f1" ./scripts/create-clusters.sh
+KIND_TAG="v1.28.5" ./scripts/create-clusters.sh
 
 declare -a join_cluster_list=()
 if [[ -z "${JOIN_CLUSTERS}" ]]; then
