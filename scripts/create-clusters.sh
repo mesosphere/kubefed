@@ -25,7 +25,7 @@ set -o pipefail
 source "${BASH_SOURCE%/*}/util.sh"
 NUM_CLUSTERS="${NUM_CLUSTERS:-2}"
 KIND_IMAGE="${KIND_IMAGE:-}"
-KIND_TAG="${KIND_TAG:-v1.24.2@sha256:1f0cee2282f43150b52dc7933183ed96abdcfc8d293f30ec07082495874876f1}"
+KIND_TAG="${KIND_TAG:-v1.28.5}"
 OS="$(uname)"
 
 function create-clusters() {
@@ -35,7 +35,7 @@ function create-clusters() {
   if [[ "${KIND_IMAGE}" ]]; then
     image_arg="--image=${KIND_IMAGE}"
   elif [[ "${KIND_TAG}" ]]; then
-    image_arg="--image=kindest/node:${KIND_TAG}"
+    image_arg="--image=ghcr.io/mesosphere/kind-node:${KIND_TAG}"
   fi
   for i in $(seq "${num_clusters}"); do
     kind create cluster --name "cluster${i}" "${image_arg}"

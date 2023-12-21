@@ -50,17 +50,17 @@ curl "${curl_args}" "${kb_url}" \
   | tar xzP -C "${dest_dir}" --strip-components=2
 
 go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-source <(setup-envtest use -p env 1.24.x)
+source <(setup-envtest use -p env 1.28.x)
 
 echo "KUBEBUILDER_ASSETS is set to ${KUBEBUILDER_ASSETS}"
 
-helm_version="3.6.0"
+helm_version="3.13.0"
 helm_tgz="helm-v${helm_version}-${platform}-amd64.tar.gz"
 helm_url="https://get.helm.sh/$helm_tgz"
 curl "${curl_args}" "${helm_url}" \
     | tar xzP -C "${dest_dir}" --strip-components=1 "${platform}-amd64/helm"
 
-kubectl_version="v1.21.14"
+kubectl_version="v1.28.5"
 curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl"
 (cd "${dest_dir}" && \
  echo "$(curl -L "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl.sha256")  kubectl" | \
@@ -68,7 +68,7 @@ curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin
 )
 chmod +x "${dest_dir}/kubectl"
 
-golint_version="1.51.2"
+golint_version="1.55.2"
 golint_dir="golangci-lint-${golint_version}-${platform}-amd64"
 golint_tgz="${golint_dir}.tar.gz"
 golint_url="https://github.com/golangci/golangci-lint/releases/download/v${golint_version}/${golint_tgz}"
@@ -83,7 +83,7 @@ popd
 echo    "# destination:"
 echo    "#   ${dest_dir}"
 echo    "# versions:"
-echo -n "#   kubectl:        "; "${dest_dir}/kubectl" version --client --short
+echo -n "#   kubectl:        "; "${dest_dir}/kubectl" version --client
 echo -n "#   kubebuilder:    "; "${dest_dir}/kubebuilder" version
 echo -n "#   helm:           "; "${dest_dir}/helm" version --client --short
 echo -n "#   golangci-lint:  "; "${dest_dir}/golangci-lint" --version

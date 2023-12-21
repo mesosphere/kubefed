@@ -87,7 +87,7 @@ all: container hyperfed controller kubefedctl webhook e2e
 # Unit tests
 test:
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-	source <(setup-envtest use -p env 1.24.x) && \
+	source <(setup-envtest use -p env 1.28.x) && \
 		go test $(TEST_PKGS)
 
 build: hyperfed controller kubefedctl webhook
