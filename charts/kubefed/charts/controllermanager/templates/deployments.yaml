@@ -41,7 +41,7 @@ spec:
       priorityClassName: "{{ .Values.global.priorityClassName }}"
       {{- end }}
       securityContext:
-        runAsUser: 1001
+        runAsUser: 65532
       serviceAccountName: kubefed-controller
       containers:
       - command:
@@ -110,7 +110,7 @@ spec:
       priorityClassName: "{{ .Values.global.priorityClassName }}"
       {{- end }}
       securityContext:
-        runAsUser: 1001
+        runAsUser: 65532
       serviceAccountName: kubefed-admission-webhook
       containers:
       - name: admission-webhook

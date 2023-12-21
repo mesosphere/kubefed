@@ -86,9 +86,16 @@ lint:
 	golangci-lint run -c .golangci.yml --fix
 
 container: $(HYPERFED_TARGET)-linux-$(HOST_ARCH)
-	cp -f $(HYPERFED_TARGET)-linux-$(HOST_ARCH) images/kubefed/hyperfed
-	$(DOCKER) build images/kubefed -t $(IMAGE_NAME)
-	rm -f images/kubefed/hyperfed
+	@tmpdir=`mktemp --tmpdir -d`; \
+	trap 'rm -rf "$$tmpdir"' EXIT; \
+	cp $(HYPERFED_TARGET)-linux-$(HOST_ARCH) $$tmpdir/hyperfed; \
+	cp images/kubefed/Dockerfile $$tmpdir; \
+	pushd $$tmpdir &>/dev/null; \
+	ln -s hyperfed controller-manager; \
+	ln -s hyperfed kubefedctl; \
+	ln -s hyperfed webhook; \
+	popd &>/dev/null; \
+	$(DOCKER) build $$tmpdir -t $(IMAGE_NAME)
 
 bindir:
 	mkdir -p $(BIN_DIR)
