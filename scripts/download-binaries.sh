@@ -68,7 +68,7 @@ curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin
 )
 chmod +x "${dest_dir}/kubectl"
 
-golint_version="1.55.2"
+golint_version="1.63.4"
 golint_dir="golangci-lint-${golint_version}-${platform}-amd64"
 golint_tgz="${golint_dir}.tar.gz"
 golint_url="https://github.com/golangci/golangci-lint/releases/download/v${golint_version}/${golint_tgz}"
