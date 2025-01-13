@@ -1,0 +1,23 @@
+name: release-please-main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches:
+      # (todo): migrate to main
+      - master
+
+jobs:
+  release-please:
+    runs-on:
+    - self-hosted
+    - small
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release-please
+        with:
+          token: ${{ secrets.MESOSPHERECI_USER_TOKEN }}
