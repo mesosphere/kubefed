@@ -141,7 +141,7 @@ var _ = Describe("Default", func() {
 	// is resolved.
 	It(fmt.Sprintf("%s does not cause controller-manager to fail", resourceName), func() {
 		if framework.TestContext.LimitedScope {
-			framework.Skipf(fmt.Sprintf("Testing of default %s requires an isolated test namespace which is only possible with a cluster-scoped control plane", resourceName))
+			framework.Skipf("Testing of default %s requires an isolated test namespace which is only possible with a cluster-scoped control plane", resourceName)
 		}
 
 		By(fmt.Sprintf("Creating a %s defaulted by the mutating admission webhook", resourceName))
