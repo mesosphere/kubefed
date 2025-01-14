@@ -3,6 +3,7 @@ name: release-please-main
 permissions:
   contents: write
   pull-requests: write
+  actions: write
 
 on:
   workflow_dispatch: {}
@@ -11,13 +12,19 @@ on:
       # (todo): migrate to main
       - master
 
+defaults:
+  run:
+    shell: bash
+
 jobs:
   release-please:
     runs-on:
-    - self-hosted
-    - small
+    - ubuntu-latest
+
     steps:
       - uses: googleapis/release-please-action@v4
         id: release-please
         with:
-          token: ${{ secrets.MESOSPHERECI_USER_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
