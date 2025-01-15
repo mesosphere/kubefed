@@ -104,7 +104,7 @@ func StartKubeFedSyncController(controllerConfig *util.ControllerConfig, stopCha
 	if controllerConfig.MinimizeLatency {
 		controller.minimizeLatency()
 	}
-	klog.Infof(fmt.Sprintf("Starting sync controller for %q", typeConfig.GetFederatedType().Kind))
+	klog.Infof("Starting sync controller for %q", typeConfig.GetFederatedType().Kind)
 	controller.Run(stopChan)
 	return nil
 }

@@ -326,7 +326,7 @@ func schedule(planner *planner.Planner, key string, clusterNames []string, curre
 			}
 			fmt.Fprintf(buf, "\n")
 		}
-		klog.V(4).Infof(buf.String())
+		klog.V(4).Infof("buf.string:%s", buf.String())
 	}
 	return result, nil
 }

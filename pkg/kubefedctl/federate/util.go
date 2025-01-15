@@ -215,7 +215,7 @@ func getResourcesInNamespace(config *rest.Config, namespace string, skipAPIResou
 				klog.Warningf("Skipping resource %s of type %s because it does not conform to the DNS-1123 subdomain spec.", resource.GetName(), apiResource.Name)
 				klog.Warningf("The following error(s) were reported during DNS-1123 validation: ")
 				for _, err := range errors {
-					klog.Warningf(err)
+					klog.Warningf("%s", err)
 				}
 			}
 		}

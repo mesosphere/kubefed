@@ -282,7 +282,7 @@ func joinClusterForNamespace(hostConfig, clusterConfig *rest.Config, kubefedName
 	if clusterConfig.Proxy != nil {
 		url, err := clusterConfig.Proxy(nil)
 		if err != nil {
-			klog.V(2).Infof("Error getting proxy URL for host %s: %w", clusterConfig.Host, err)
+			klog.V(2).Infof("Error getting proxy URL for host %s: %v", clusterConfig.Host, err)
 			return nil, errors.Errorf("failed to create proxy URL request for kubefed cluster: %v", err)
 		}
 		if url != nil {

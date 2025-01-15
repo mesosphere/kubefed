@@ -1,6 +1,6 @@
 module sigs.k8s.io/kubefed
 
-go 1.21
+go 1.23.4
 
 require (
 	github.com/evanphx/json-patch v5.6.0+incompatible
@@ -21,7 +21,7 @@ require (
 	k8s.io/apiserver v0.27.2
 	k8s.io/client-go v0.27.2
 	k8s.io/component-base v0.27.2
-	k8s.io/klog/v2 v2.90.1
+	k8s.io/klog/v2 v2.130.1
 	k8s.io/kube-openapi v0.0.0-20230501164219-8b0f38b5fd1f
 	k8s.io/kubectl v0.26.3
 	k8s.io/utils v0.0.0-20230726121419-3b25d923346b
@@ -45,7 +45,7 @@ require (
 	github.com/evanphx/json-patch/v5 v5.6.0 // indirect
 	github.com/felixge/httpsnoop v1.0.3 // indirect
 	github.com/fsnotify/fsnotify v1.6.0 // indirect
-	github.com/go-logr/logr v1.2.4 // indirect
+	github.com/go-logr/logr v1.4.1 // indirect
 	github.com/go-logr/stdr v1.2.2 // indirect
 	github.com/go-logr/zapr v1.2.4 // indirect
 	github.com/go-openapi/jsonpointer v0.19.6 // indirect
