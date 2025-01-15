@@ -50,7 +50,7 @@ curl "${curl_args}" "${kb_url}" \
   | tar xzP -C "${dest_dir}" --strip-components=2
 
 go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-source <(setup-envtest use -p env 1.28.x)
+source <(setup-envtest use -p env 1.31.x)
 
 echo "KUBEBUILDER_ASSETS is set to ${KUBEBUILDER_ASSETS}"
 
