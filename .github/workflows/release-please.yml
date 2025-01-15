@@ -6,10 +6,13 @@ permissions:
   actions: write
 
 on:
+  workflow_dispatch:
   push:
     branches:
       # (todo): migrate to main
-      - Shubham/release-please-auto
+      - master
+    tags:
+      - 'v*'
 
 defaults:
   run:
@@ -27,7 +30,6 @@ jobs:
         id: release-please
         with:
           release-type: go
-          package-name: "."
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
         env:
