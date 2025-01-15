@@ -60,7 +60,7 @@ helm_url="https://get.helm.sh/$helm_tgz"
 curl "${curl_args}" "${helm_url}" \
     | tar xzP -C "${dest_dir}" --strip-components=1 "${platform}-amd64/helm"
 
-kubectl_version="v1.28.5"
+kubectl_version="v1.32.0"
 curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl"
 (cd "${dest_dir}" && \
  echo "$(curl -L "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl.sha256")  kubectl" | \

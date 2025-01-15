@@ -25,7 +25,7 @@ set -o pipefail
 source "${BASH_SOURCE%/*}/util.sh"
 NUM_CLUSTERS="${NUM_CLUSTERS:-2}"
 KIND_IMAGE="${KIND_IMAGE:-}"
-KIND_TAG="${KIND_TAG:-v1.28.5}"
+KIND_TAG="${KIND_TAG:-v1.32.0}"
 OS="$(uname)"
 
 function create-clusters() {
