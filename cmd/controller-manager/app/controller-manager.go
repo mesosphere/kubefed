@@ -40,7 +40,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
+
+	// "sigs.k8s.io/controller-runtime/pkg/metrics"
 
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/leaderelection"
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/options"
@@ -57,8 +58,8 @@ import (
 )
 
 const (
-	metricsDefaultBindAddress = ":9090"
-	healthzDefaultBindAddress = ":8080"
+	metricsserverDefaultBindAddress = ":9090"
+	healthzDefaultBindAddress       = ":8080"
 )
 
 var (
@@ -94,7 +95,7 @@ member clusters and do the necessary reconciliation`,
 	flags := cmd.Flags()
 	opts.AddFlags(flags)
 	flags.StringVar(&healthzAddr, "healthz-addr", healthzDefaultBindAddress, "The address the healthz endpoint binds to.")
-	flags.StringVar(&metricsAddr, "metrics-addr", metricsDefaultBindAddress, "The address the metric endpoint binds to.")
+	flags.StringVar(&metricsAddr, "metrics-addr", metricsserverDefaultBindAddress, "The address the metric endpoint binds to.")
 	flags.BoolVar(&verFlag, "version", false, "Prints the Version info of controller-manager.")
 	flags.StringVar(&kubeFedConfig, "kubefed-config", "", "Path to a KubeFedConfig yaml file. Test only.")
 	flags.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
