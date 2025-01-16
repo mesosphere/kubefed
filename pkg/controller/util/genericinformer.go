@@ -49,7 +49,7 @@ func NewGenericInformerWithEventHandler(config *rest.Config, namespace string, o
 		return nil, nil, err
 	}
 
-	mapper, err := apiutil.NewDiscoveryRESTMapper(config, restClient)
+	mapper, err := apiutil.NewDynamicRESTMapper(config, restClient)
 	if err != nil {
 		return nil, nil, errors.Wrap(err, "Could not create RESTMapper from config")
 	}
