@@ -28,7 +28,6 @@ import (
 	// Installs pprof profiling debug endpoints at /debug/pprof.
 	_ "net/http/pprof"
 
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
@@ -410,7 +409,7 @@ func serveHealthz(address string) {
 }
 
 func serveMetrics(address string, stop <-chan struct{}) {
-	listener, err := prometheus.Registerer.MustRegister(address)
+	listener, err := metrics.NewListener(address)
 	if err != nil {
 		klog.Errorf("error creating the new metrics listener")
 		klog.Fatal(err)
