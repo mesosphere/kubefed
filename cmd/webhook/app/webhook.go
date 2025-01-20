@@ -17,11 +17,12 @@ import (
 
 	// metricsserver "sigs.k8s.io/controller-runtime/pkg/webhook"
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
-
+	ctrwebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/federatedtypeconfig"
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/kubefedcluster"
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/kubefedconfig"
 	"sigs.k8s.io/kubefed/pkg/version"
+	// "sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
 
 var (
@@ -85,10 +86,10 @@ func Run(stopChan <-chan struct{}) error {
 	}
 	hookServer := mgr.GetWebhookServer()
 
-	hookServer.Register("/validate-federatedtypeconfigs", &metricsserver.Admission{Handler: &federatedtypeconfig.FederatedTypeConfigAdmissionHook{}})
-	hookServer.Register("/validate-kubefedcluster", &metricsserver.Admission{Handler: &kubefedcluster.KubeFedClusterAdmissionHook{}})
-	hookServer.Register("/validate-kubefedconfig", &metricsserver.Admission{Handler: &kubefedconfig.KubeFedConfigValidator{}})
-	hookServer.Register("/default-kubefedconfig", &metricsserver.Admission{Handler: &kubefedconfig.KubeFedConfigDefaulter{}})
+	hookServer.Register("/validate-federatedtypeconfigs", &ctrwebhook.Admission{Handler: &federatedtypeconfig.FederatedTypeConfigAdmissionHook{}})
+	hookServer.Register("/validate-kubefedcluster", &ctrwebhook.Admission{Handler: &kubefedcluster.KubeFedClusterAdmissionHook{}})
+	hookServer.Register("/validate-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigValidator{}})
+	hookServer.Register("/default-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigDefaulter{}})
 
 	hookServer.WebhookMux().Handle("/readyz/", http.StripPrefix("/readyz/", &healthz.Handler{}))
 
