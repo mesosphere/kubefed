@@ -1,6 +1,7 @@
 package app
 
 import (
+	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
@@ -80,11 +81,18 @@ func Run(stopChan <-chan struct{}) error {
 	if err != nil {
 		klog.Fatalf("error setting up webhook's config: %s", err)
 	}
+	// mgr, err := manager.New(config, manager.Options{
+	// 	WebhookServer: webhook.NewServer(webhook.Options{
+	// 		Port:    envtest.WebhookInstallOptions.LocalServingPort,
+	// 		CertDir: envtest.WebhookInstallOptions.LocalServingCertDir,
+	// 		TLSOpts: []func(*tls.Config){func(config *tls.Config) {}},
+	// 	}),
+	// })
 	mgr, err := manager.New(config, manager.Options{
 		WebhookServer: webhook.NewServer(webhook.Options{
 			Port:    port,
 			CertDir: certDir,
-			// TLSOpts: []func(*tls.Config){func(config *tls.Config) {}},
+			TLSOpts: []func(*tls.Config){func(config *tls.Config) {}},
 		}),
 	})
 	// mgr, err := manager.New(config, manager.Options{
