@@ -40,8 +40,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
-
 	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/leaderelection"
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/options"
@@ -410,7 +410,7 @@ func serveHealthz(address string) {
 }
 
 func serveMetrics(address string, stop <-chan struct{}) {
-	listener, err := metrics.NewListener(address)
+	listener, err := metricsserver.Server(address)
 	if err != nil {
 		klog.Errorf("error creating the new metrics listener")
 		klog.Fatal(err)
