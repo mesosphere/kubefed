@@ -75,8 +75,10 @@ func Run(stopChan <-chan struct{}) error {
 		klog.Fatalf("error setting up webhook's config: %s", err)
 	}
 	mgr, err := manager.New(config, manager.Options{
-		Port:    port,
-		CertDir: certDir,
+		WebhookServer: ctrwebhook.NewServer(ctrwebhook.Options{
+			Port:    port,
+			CertDir: certDir,
+		}),
 	})
 	if err != nil {
 		klog.Fatalf("error setting up webhook manager: %s", err)

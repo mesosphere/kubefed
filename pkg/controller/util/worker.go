@@ -71,7 +71,7 @@ type asyncWorker struct {
 	deliverer *DelayingDeliverer
 
 	// Work queue allowing parallel processing of resources
-	queue workqueue.Interface
+	queue workqueue.TypedInterface[any]
 
 	// Backoff manager
 	backoff *flowcontrol.Backoff
@@ -99,8 +99,10 @@ func NewReconcileWorker(name string, reconcile ReconcileFunc, options WorkerOpti
 		timing:                  options.WorkerTiming,
 		maxConcurrentReconciles: options.MaxConcurrentReconciles,
 		deliverer:               NewDelayingDeliverer(),
-		queue:                   workqueue.NewNamed(name),
-		backoff:                 flowcontrol.NewBackOff(options.InitialBackoff, options.MaxBackoff),
+		queue: workqueue.NewTypedWithConfig(workqueue.QueueConfig{
+			Name: name,
+		}),
+		backoff: flowcontrol.NewBackOff(options.InitialBackoff, options.MaxBackoff),
 	}
 }
 

@@ -28,7 +28,6 @@ import (
 	// Installs pprof profiling debug endpoints at /debug/pprof.
 	_ "net/http/pprof"
 
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 	apiextv1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1"
@@ -40,7 +39,8 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
-	"sigs.k8s.io/controller-runtime/pkg/metrics"
+	_ "sigs.k8s.io/controller-runtime/pkg/metrics" // for workqueue metrics registration
+	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/leaderelection"
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/options"
@@ -57,8 +57,8 @@ import (
 )
 
 const (
-	metricsDefaultBindAddress = ":9090"
-	healthzDefaultBindAddress = ":8080"
+	metricsserverDefaultBindAddress = ":9090"
+	healthzDefaultBindAddress       = ":8080"
 )
 
 var (
@@ -94,7 +94,7 @@ member clusters and do the necessary reconciliation`,
 	flags := cmd.Flags()
 	opts.AddFlags(flags)
 	flags.StringVar(&healthzAddr, "healthz-addr", healthzDefaultBindAddress, "The address the healthz endpoint binds to.")
-	flags.StringVar(&metricsAddr, "metrics-addr", metricsDefaultBindAddress, "The address the metric endpoint binds to.")
+	flags.StringVar(&metricsAddr, "metrics-addr", metricsserverDefaultBindAddress, "The address the metric endpoint binds to.")
 	flags.BoolVar(&verFlag, "version", false, "Prints the Version info of controller-manager.")
 	flags.StringVar(&kubeFedConfig, "kubefed-config", "", "Path to a KubeFedConfig yaml file. Test only.")
 	flags.StringVar(&kubeconfig, "kubeconfig", "", "Path to a kubeconfig. Only required if out-of-cluster.")
@@ -380,7 +380,7 @@ func setOptionsByKubeFedConfig(opts *options.Options) {
 
 	opts.Config.SkipAdoptingResources = *spec.SyncController.AdoptResources == corev1b1.AdoptResourcesDisabled
 
-	var featureGates = make(map[string]bool)
+	featureGates := make(map[string]bool)
 	for _, v := range fedConfig.Spec.FeatureGates {
 		featureGates[v.Name] = v.Configuration == corev1b1.ConfigurationEnabled
 	}
@@ -409,24 +409,19 @@ func serveHealthz(address string) {
 }
 
 func serveMetrics(address string, stop <-chan struct{}) {
-	listener, err := metrics.NewListener(address)
+	s, err := metricsserver.NewServer(metricsserver.Options{
+		BindAddress: address,
+	}, nil, nil)
 	if err != nil {
 		klog.Errorf("error creating the new metrics listener")
 		klog.Fatal(err)
 	}
-	var metricsPath = "/metrics"
-	handler := promhttp.HandlerFor(metrics.Registry, promhttp.HandlerOpts{
-		ErrorHandling: promhttp.HTTPErrorOnError,
-	})
-	mux := http.NewServeMux()
-	mux.Handle(metricsPath, handler)
-	server := http.Server{
-		Handler: mux,
-	}
+
+	ctx, cancel := context.WithCancel(context.Background())
 	// Run the server
 	go func() {
-		klog.V(1).Infof("starting metrics server path %s", metricsPath)
-		if err := server.Serve(listener); err != nil && err != http.ErrServerClosed {
+		klog.V(1).Infof("starting metrics server path /metrics")
+		if err := s.Start(ctx); err != nil {
 			klog.Errorf("error starting the mertrics server")
 			klog.Fatal(err)
 		}
@@ -434,8 +429,5 @@ func serveMetrics(address string, stop <-chan struct{}) {
 
 	// Shutdown the server when stop is closed
 	<-stop
-	if err := server.Shutdown(context.Background()); err != nil {
-		klog.Errorf("error shutting down the server")
-		klog.Fatal(err)
-	}
+	cancel()
 }
