@@ -51,8 +51,8 @@ func newResourceInformer(client ResourceClient, namespace string, apiResource *m
 		gvk := schema.GroupVersionKind{Group: apiResource.Group, Version: apiResource.Version, Kind: apiResource.Kind}
 		obj.SetGroupVersionKind(gvk)
 	}
-	return cache.NewInformer(
-		&cache.ListWatch{
+	return cache.NewInformerWithOptions(cache.InformerOptions{
+		ListerWatcher: &cache.ListWatch{
 			ListFunc: func(options metav1.ListOptions) (pkgruntime.Object, error) {
 				options.LabelSelector = labelSelector
 				return client.Resources(namespace).List(context.Background(), options)
@@ -62,10 +62,10 @@ func newResourceInformer(client ResourceClient, namespace string, apiResource *m
 				return client.Resources(namespace).Watch(context.Background(), options)
 			},
 		},
-		obj, // use an unstructured type with apiVersion / kind populated for informer logging purposes
-		NoResyncPeriod,
-		NewTriggerOnAllChanges(triggerFunc),
-	)
+		ObjectType:   obj,
+		ResyncPeriod: NoResyncPeriod,
+		Handler:      NewTriggerOnAllChanges(triggerFunc),
+	})
 }
 
 func ObjFromCache(store cache.Store, kind, key string) (*unstructured.Unstructured, error) {

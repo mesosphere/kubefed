@@ -70,8 +70,8 @@ func NewGenericInformerWithEventHandler(config *rest.Config, namespace string, o
 		return nil, nil, err
 	}
 
-	store, controller := cache.NewInformer(
-		&cache.ListWatch{
+	store, controller := cache.NewInformerWithOptions(cache.InformerOptions{
+		ListerWatcher: &cache.ListWatch{
 			ListFunc: func(opts metav1.ListOptions) (pkgruntime.Object, error) {
 				res := listObj.DeepCopyObject()
 				isNamespaceScoped := namespace != "" && mapping.Scope.Name() != meta.RESTScopeNameRoot
@@ -85,9 +85,9 @@ func NewGenericInformerWithEventHandler(config *rest.Config, namespace string, o
 				return client.Get().NamespaceIfScoped(namespace, isNamespaceScoped).Resource(mapping.Resource.Resource).VersionedParams(&opts, scheme.ParameterCodec).Watch(context.Background())
 			},
 		},
-		obj,
-		resyncPeriod,
-		resourceEventHandlerFuncs,
-	)
+		ObjectType:   obj,
+		ResyncPeriod: resyncPeriod,
+		Handler:      resourceEventHandlerFuncs,
+	})
 	return store, controller, nil
 }
