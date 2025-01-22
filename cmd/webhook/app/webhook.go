@@ -1,7 +1,6 @@
 package app
 
 import (
-	"crypto/tls"
 	"flag"
 	"fmt"
 	"net/http"
@@ -15,18 +14,12 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 	"sigs.k8s.io/controller-runtime/pkg/manager/signals"
-	"sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	// "sigs.k8s.io/controller-runtime/pkg/webhook"
-
-	// metricsserver "sigs.k8s.io/controller-runtime/pkg/webhook"
-
 	ctrwebhook "sigs.k8s.io/controller-runtime/pkg/webhook"
+
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/federatedtypeconfig"
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/kubefedcluster"
 	"sigs.k8s.io/kubefed/pkg/controller/webhook/kubefedconfig"
 	"sigs.k8s.io/kubefed/pkg/version"
-	// "sigs.k8s.io/controller-runtime/pkg/webhook/conversion"
 )
 
 var (
@@ -81,32 +74,20 @@ func Run(stopChan <-chan struct{}) error {
 	if err != nil {
 		klog.Fatalf("error setting up webhook's config: %s", err)
 	}
-	// mgr, err := manager.New(config, manager.Options{
-	// 	WebhookServer: webhook.NewServer(webhook.Options{
-	// 		Port:    envtest.WebhookInstallOptions.LocalServingPort,
-	// 		CertDir: envtest.WebhookInstallOptions.LocalServingCertDir,
-	// 		TLSOpts: []func(*tls.Config){func(config *tls.Config) {}},
-	// 	}),
-	// })
 	mgr, err := manager.New(config, manager.Options{
-		WebhookServer: webhook.NewServer(webhook.Options{
+		WebhookServer: ctrwebhook.NewServer(ctrwebhook.Options{
 			Port:    port,
 			CertDir: certDir,
-			TLSOpts: []func(*tls.Config){func(config *tls.Config) {}},
 		}),
 	})
-	// mgr, err := manager.New(config, manager.Options{
-	// 	Port:    port,
-	// 	CertDir: certDir,
-	// })
 	if err != nil {
 		klog.Fatalf("error setting up webhook manager: %s", err)
 	}
 	hookServer := mgr.GetWebhookServer()
 
 	hookServer.Register("/validate-federatedtypeconfigs", &ctrwebhook.Admission{Handler: &federatedtypeconfig.FederatedTypeConfigAdmissionHook{}})
-	hookServer.Register("/validate-kubefedcluster", &ctrwebhook.Admission{Handler: &kubefedcluster.KubeFedClusterAdmissionHook{}})
 	hookServer.Register("/validate-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigValidator{}})
+	hookServer.Register("/validate-kubefedcluster", &ctrwebhook.Admission{Handler: &kubefedcluster.KubeFedClusterAdmissionHook{}})
 	hookServer.Register("/default-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigDefaulter{}})
 
 	hookServer.WebhookMux().Handle("/readyz/", http.StripPrefix("/readyz/", &healthz.Handler{}))
