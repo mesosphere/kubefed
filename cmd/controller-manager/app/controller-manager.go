@@ -39,6 +39,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
+	_ "sigs.k8s.io/controller-runtime/pkg/metrics" // for workqueue metrics registration
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/leaderelection"
