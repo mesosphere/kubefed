@@ -86,8 +86,8 @@ func Run(stopChan <-chan struct{}) error {
 	hookServer := mgr.GetWebhookServer()
 
 	hookServer.Register("/validate-federatedtypeconfigs", &ctrwebhook.Admission{Handler: &federatedtypeconfig.FederatedTypeConfigAdmissionHook{}})
-	hookServer.Register("/validate-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigValidator{}})
 	hookServer.Register("/validate-kubefedcluster", &ctrwebhook.Admission{Handler: &kubefedcluster.KubeFedClusterAdmissionHook{}})
+	hookServer.Register("/validate-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigValidator{}})
 	hookServer.Register("/default-kubefedconfig", &ctrwebhook.Admission{Handler: &kubefedconfig.KubeFedConfigDefaulter{}})
 
 	hookServer.WebhookMux().Handle("/readyz/", http.StripPrefix("/readyz/", &healthz.Handler{}))
