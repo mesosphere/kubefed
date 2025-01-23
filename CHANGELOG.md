@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.11.1 (2025-01-23)
+
+## What's Changed
+* fix: release please action by @mhrabovcin in https://github.com/mesosphere/kubefed/pull/33
+
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.11.0...v0.11.1
+
 ## 0.11.0 (2025-01-23)
 
 ## What's Changed
