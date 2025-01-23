@@ -1,4 +1,29 @@
-# v0.10.0
+# Changelog
+
+## 0.11.0 (2025-01-23)
+
+## What's Changed
+* build: Add v0.10.4 helm chart to repo index by @jimmidyson in https://github.com/mesosphere/kubefed/pull/19
+* feat: upgrade to go 1.23.4 by @SandhyaRavi2403 in https://github.com/mesosphere/kubefed/pull/21
+* feat: Envtest version upgraded by @ArvinderPal09 in https://github.com/mesosphere/kubefed/pull/23
+* feat: Kind and Kubectl version upgraded by @ArvinderPal09 in https://github.com/mesosphere/kubefed/pull/24
+* chore: Add release please action by @shubham2g in https://github.com/mesosphere/kubefed/pull/22
+* fix: Enable dependabot config by @shubham2g in https://github.com/mesosphere/kubefed/pull/26
+* build(deps): bump actions/setup-go from 4 to 5 by @dependabot in https://github.com/mesosphere/kubefed/pull/27
+* build(deps): bump actions/checkout from 3 to 4 by @dependabot in https://github.com/mesosphere/kubefed/pull/28
+* build(deps): bump docker/login-action from 2 to 3 by @dependabot in https://github.com/mesosphere/kubefed/pull/29
+* build(deps): bump the all-go-mod-patch-and-minor group across 1 directory with 17 updates by @dependabot in https://github.com/mesosphere/kubefed/pull/30
+* build(deps): bump k8s.io/kubectl from 0.32.0 to 0.32.1 in the all-go-mod-patch-and-minor group across 1 directory by @dependabot in https://github.com/mesosphere/kubefed/pull/32
+
+## New Contributors
+* @SandhyaRavi2403 made their first contribution in https://github.com/mesosphere/kubefed/pull/21
+* @ArvinderPal09 made their first contribution in https://github.com/mesosphere/kubefed/pull/23
+* @shubham2g made their first contribution in https://github.com/mesosphere/kubefed/pull/22
+* @dependabot made their first contribution in https://github.com/mesosphere/kubefed/pull/27
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.10.4...v0.11.0
+
+## v0.10.0
 
 ## BREAKING CHANGE
 
@@ -27,7 +52,7 @@ on Kubernetes versions >=v1.22.
 
 **Full Changelog**: https://github.com/kubernetes-sigs/kubefed/compare/v0.9.2...v0.10.0
 
-# v0.9.2
+## v0.9.2
 
 ## What's Changed
 * Introduce cluster config malformed condition to KubeFedCluster by @zqzten in https://github.com/kubernetes-sigs/kubefed/pull/1476
@@ -42,11 +67,11 @@ on Kubernetes versions >=v1.22.
 
 **Full Changelog**: https://github.com/kubernetes-sigs/kubefed/compare/v0.9.1...v0.9.2
 
-# v0.9.1
+## v0.9.1
 - [#1490](https://github.com/kubernetes-sigs/kubefed/pull/1490)
   fix: Fix mutatingwebhookconfiguration CA cert when cert-manager is enabled
 
-# v0.9.0
+## v0.9.0
 - [#1460](https://github.com/kubernetes-sigs/kubefed/pull/1460)
   feat: introduce informer cache sync timeout
 - [#1468](https://github.com/kubernetes-sigs/kubefed/pull/1468)
@@ -55,7 +80,7 @@ on Kubernetes versions >=v1.22.
   fix: KubeFed controller crash when meeting negative array index in overrides
 - [#1461](https://github.com/kubernetes-sigs/kubefed/pull/1461)
   fix: Increase the default QPS and Burst value of the controller manager
-# v0.8.1
+## v0.8.1
 - [#1435](https://github.com/kubernetes-sigs/kubefed/pull/1435)
   fix: Support Kubernetes pre-release versions in kubefed chart
 - [#1432](https://github.com/kubernetes-sigs/kubefed/pull/1432)
@@ -66,7 +91,7 @@ on Kubernetes versions >=v1.22.
   fix: retry on recoverable propagation failure
 - [#1416](https://github.com/kubernetes-sigs/kubefed/pull/1416)
   feat: Make restclient config configurable
-# v0.8.0
+## v0.8.0
 - [#1332](https://github.com/kubernetes-sigs/kubefed/pull/1332)
   fix: Error on existing secrets
 - [#1379](https://github.com/kubernetes-sigs/kubefed/pull/1379)
@@ -100,7 +125,7 @@ on Kubernetes versions >=v1.22.
 - [#1427](https://github.com/kubernetes-sigs/kubefed/pull/1427)
   chore: Kind and Kubernetes upgrade
 
-# v0.7.0
+## v0.7.0
 - [#1380](https://github.com/kubernetes-sigs/kubefed/pull/1380) 
   fix: infinite reconciliation loop.
 - [#1385](https://github.com/kubernetes-sigs/kubefed/pull/1385) 
@@ -124,14 +149,14 @@ on Kubernetes versions >=v1.22.
 - [#1351](https://github.com/kubernetes-sigs/kubefed/pull/1351) 
   chore: remove feature CrossClusterServiceDiscovery.
 
-# v0.6.1
+## v0.6.1
 - [#1346](https://github.com/kubernetes-sigs/kubefed/pull/1346)
   fix: upgrade path broken from older versions than v0.6.0.
 - [#1347](https://github.com/kubernetes-sigs/kubefed/pull/1347)
   chore: retain healthCheckNodePort for service when updating.
 - [#1334](https://github.com/kubernetes-sigs/kubefed/pull/1334)
   chore: exec enable cmd ignore some apiservices errors.
-# v0.6.0
+## v0.6.0
 - [#1328](https://github.com/kubernetes-sigs/kubefed/pull/1328)
   docs: optimize chart readme. 
 - [#1292](https://github.com/kubernetes-sigs/kubefed/pull/1292)
@@ -144,12 +169,12 @@ on Kubernetes versions >=v1.22.
   make create-clusters.sh work based on kind document. 
 - [#1297](https://github.com/kubernetes-sigs/kubefed/pull/1297)
   feat: Transition from apiextensions.k8s.io/v1beta1 to apiextensions.k8s.io/v1.
-# v0.5.1
+## v0.5.1
 - [#1318](https://github.com/kubernetes-sigs/kubefed/pull/1318)
   chore: make certain cert-manager properties configurable.
 - [#1315](https://github.com/kubernetes-sigs/kubefed/pull/1315)
   fix: klog verbosity detection.
-# v0.5.0
+## v0.5.0
 - [#1310](https://github.com/kubernetes-sigs/kubefed/pull/1310)
   chore: Add labels to service.
 - [#1308](https://github.com/kubernetes-sigs/kubefed/pull/1308) 
@@ -168,7 +193,7 @@ on Kubernetes versions >=v1.22.
   chore: disable CrossClusterDiscovery feature by default
 - [#1294](https://github.com/kubernetes-sigs/kubefed/pull/1294)
   fix: prefer core resources when enabling a type.
-# v0.4.1
+## v0.4.1
 - [#1289](https://github.com/kubernetes-sigs/kubefed/pull/1289) 
   chore: use cert-mananager.io/v1 group/version
 - [#1286](https://github.com/kubernetes-sigs/kubefed/pull/1286) 
@@ -181,7 +206,7 @@ on Kubernetes versions >=v1.22.
   Add a shortname to replicaschedulingpreference
 - [#1274]((https://github.com/kubernetes-sigs/kubefed/pull/1274)
   Update linters and gofmt scripts 
-# v0.4.0
+## v0.4.0
 - [#1260](https://github.com/kubernetes-sigs/kubefed/pull/1260)
   Helm 3 chart migration.
 - [#1269](https://github.com/kubernetes-sigs/kubefed/pull/1270)
@@ -190,7 +215,7 @@ on Kubernetes versions >=v1.22.
   Migrate to controller-runtime webhook server from unmaintained /openshift generic-admission-server.
 - [#1261](https://github.com/kubernetes-sigs/kubefed/pull/1261)
   Split helm chart values for webhook and controller-manager deployments.
-# v0.3.1
+## v0.3.1
 -  [#1251](https://github.com/kubernetes-sigs/kubefed/pull/1251)
    Update dependency to kubernetes 1.18.6.
 -  [#1248](https://github.com/kubernetes-sigs/kubefed/pull/1248)
@@ -213,7 +238,7 @@ on Kubernetes versions >=v1.22.
    Upgrage ingress to 0.32.
 -  [#1221](https://github.com/kubernetes-sigs/kubefed/pull/1221)
    Chore: make cluster creation work with kind v0.7.0.
-# v0.3.0
+## v0.3.0
 -  [#1218](https://github.com/kubernetes-sigs/kubefed/pull/1218)
    chore: Cleanup travis config about dep
 -  [#1216](https://github.com/kubernetes-sigs/kubefed/pull/1216)
@@ -230,7 +255,7 @@ on Kubernetes versions >=v1.22.
    feat: add custom kubefed metrics
 -  [#1181](https://github.com/kubernetes-sigs/kubefed/issues/1181)
    fix: namespaced condition for api resource  
-# v0.2.0-alpha.1
+## v0.2.0-alpha.1
 -  [#1129](https://github.com/kubernetes-sigs/kubefed/pull/1129)
    An empty `spec.placement.clusters` field will now always result in
    no clusters being selected. Previously an empty `clusters` field
@@ -249,7 +274,7 @@ on Kubernetes versions >=v1.22.
 -  [#1193](https://github.com/kubernetes-sigs/kubefed/pull/1193) Serve controller default metrics
 -  [#1192](https://github.com/kubernetes-sigs/kubefed/pull/1192) Add pprof profiling support
 
-# v0.1.0-rc6
+## v0.1.0-rc6
 -  [#1099](https://github.com/kubernetes-sigs/kubefed/pull/1099)
    Updates to propagation status are now only made in response to
    propagation to member clusters or errors in propagation. Previously
@@ -276,7 +301,7 @@ on Kubernetes versions >=v1.22.
    generated previously, a check has been added so that a missing spec
    field does not cause a nil pointer exception.
 
-# v0.1.0-rc5
+## v0.1.0-rc5
 -  [#1058](https://github.com/kubernetes-sigs/kubefed/issues/1058)
    KubeFedConfig spec.scope is now immutable.
 -  [#1052](https://github.com/kubernetes-sigs/kubefed/pull/1052)
@@ -292,7 +317,7 @@ on Kubernetes versions >=v1.22.
 -  [#1053](https://github.com/kubernetes-sigs/kubefed/pull/1053) API group
    changed from kubefed.k8s.io to kubefed.io.
 
-# v0.1.0-rc4
+## v0.1.0-rc4
 -  [#908](https://github.com/kubernetes-sigs/kubefed/issues/908) Adds admission
    webhook validations for KubeFedCluster API.
 -  [#982](https://github.com/kubernetes-sigs/kubefed/issues/982) To
@@ -314,7 +339,7 @@ on Kubernetes versions >=v1.22.
    of `federate` and all `orphaning-deletion` commands is not specified, use the namespace from
    the client kubeconfig context.
 
-# v0.1.0-rc3
+## v0.1.0-rc3
 -  [#520](https://github.com/kubernetes-sigs/kubefed/issues/520) Adds support
    for jsonpath overrides.
 -  [#965](https://github.com/kubernetes-sigs/kubefed/issues/965) Adds admission
@@ -324,7 +349,7 @@ on Kubernetes versions >=v1.22.
 -  [#909](https://github.com/kubernetes-sigs/kubefed/issues/909) Adds
    admission webhook validations for FederatedTypeConfig API.
 
-# v0.1.0-rc1
+## v0.1.0-rc1
 -  [#887](https://github.com/kubernetes-sigs/kubefed/pull/887) Updates
    KubefedConfig API based on Kubernetes API conventions.
 -  [#885](https://github.com/kubernetes-sigs/kubefed/pull/885) Updates
@@ -366,7 +391,7 @@ on Kubernetes versions >=v1.22.
    `kubefedctl federate` namespace with its content gets an option to
    skip API Resources via `--skip-api-resources`.
 
-# v0.0.10
+## v0.0.10
 -  [#722](https://sigs.k8s.io/kubefed/issues/722) -
    Removal of the FederatedTypeConfig for namespaces now disables all
    namespaced sync controllers. Additionally, the namespace FederatedTypeConfig
@@ -385,7 +410,7 @@ on Kubernetes versions >=v1.22.
    Added conversion of a namespace and its contents to federated
    equivalents via `kubefedctl federate ns <namespace> --contents`.
 
-# v0.0.9
+## v0.0.9
 -  [#776](https://sigs.k8s.io/kubefed/pull/776) -
    Switch to use `scope` instead of `limitedScope` to specify if it is
    `Namespaced` or `Cluster` scoped federation deployment.
@@ -410,7 +435,7 @@ on Kubernetes versions >=v1.22.
    enable the given `type` for propagation.
 
 
-# v0.0.8
+## v0.0.8
  - [#652](https://sigs.k8s.io/kubefed/pull/652) -
    Switch to sourcing the template for a FederatedNamespace from a
    field rather than the containing namespace.  This ensures
