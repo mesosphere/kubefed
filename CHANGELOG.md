@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.11.2 (2025-03-17)
+
+## What's Changed
+* build(deps): bump the all-go-mod-patch-and-minor group across 1 directory with 13 updates by @dependabot in https://github.com/mesosphere/kubefed/pull/41
+* build(deps): bump sigs.k8s.io/controller-tools from 0.17.1 to 0.17.2 in /tools in the all-go-mod-patch-and-minor group by @dependabot in https://github.com/mesosphere/kubefed/pull/39
+
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.11.1...v0.11.2
+
 ## 0.11.1 (2025-01-23)
 
 ## What's Changed
