@@ -1,7 +1,7 @@
 run:
   deadline: 180s
   tests: true
-  skip-dirs:
+  exclude-dirs:
   - .git
   - .tool
   - vendor
