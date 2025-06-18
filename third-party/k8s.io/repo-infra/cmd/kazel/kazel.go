@@ -226,7 +226,7 @@ func asExpr(e interface{}) build.Expr {
 		}
 		return &build.ListExpr{List: list}
 	case reflect.Map:
-		var list []build.Expr
+		var list []*build.KeyValueExpr
 		keys := rv.MapKeys()
 		sort.SliceStable(keys, rvSliceLessFunc(rv.Type().Key().Kind(), keys))
 		for _, key := range keys {
@@ -346,8 +346,8 @@ func RuleIsManaged(r *build.Rule) bool {
 // Otherwise, returns true.
 // If dryRun is false, no files are actually changed; otherwise, the file will be written.
 func writeFile(path string, f *build.File, boilerplate []byte, exists, dryRun bool) (bool, error) {
-	var info build.RewriteInfo
-	build.Rewrite(f, &info)
+	// var info build.RewriteInfo
+	build.Rewrite(f)
 	var out []byte
 	out = append(out, boilerplate...)
 	// double format the source file as our modification logic sometimes uses
@@ -362,14 +362,14 @@ func writeFile(path string, f *build.File, boilerplate []byte, exists, dryRun bo
 	}
 	// also call Rewrite again to run Buildifier against the results as
 	// visibility rules are not ordered correctly for some reason
-	build.Rewrite(f, &info)
+	build.Rewrite(f)
 	out = append(out, build.Format(f)...)
 	if exists {
 		orig, err := os.ReadFile(path)
 		if err != nil {
 			return false, err
 		}
-		if bytes.Compare(orig, out) == 0 {
+		if bytes.Equal(orig, out) {
 			return false, nil
 		}
 		if *printDiff {
