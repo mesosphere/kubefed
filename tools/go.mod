@@ -1,6 +1,6 @@
 module github.com/mesosphere/kommander-cluster-lifecycle/tools
 
-go 1.24.0
+go 1.24.3
 
 require (
 	github.com/go-bindata/go-bindata/v3 v3.1.3
