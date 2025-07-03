@@ -53,7 +53,7 @@ endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
 # .github/workflows files.
-BUILD_IMAGE ?= golang:1.23.4
+BUILD_IMAGE ?= golang:1.24.3
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
