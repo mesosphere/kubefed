@@ -141,7 +141,12 @@ fi
 # Use KIND_LOAD_IMAGE=y ./scripts/deploy-kubefed.sh <image> to load
 # the built docker image into kind before deploying.
 if [[ "${KIND_LOAD_IMAGE:-}" == "y" ]]; then
-    kind load docker-image "${IMAGE_NAME}" --name="${KIND_CLUSTER_NAME:-kind}"
+    # Use docker save/load method to avoid containerd snapshotter issues
+    # This is more reliable on GitHub Actions and other CI environments
+    image_archive="/tmp/$(echo "${IMAGE_NAME}" | tr '/:' '_').tar"
+    docker save "${IMAGE_NAME}" -o "${image_archive}"
+    kind load image-archive "${image_archive}" --name="${KIND_CLUSTER_NAME:-kind}"
+    rm -f "${image_archive}"
 fi
 
 cd "$(dirname "$0")/.."
