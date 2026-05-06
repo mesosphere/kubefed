@@ -39,6 +39,7 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
+	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics" // for workqueue metrics registration
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
@@ -281,67 +282,37 @@ func setDefaultKubeFedConfigScope(fedConfig *corev1b1.KubeFedConfig) bool {
 	return false
 }
 
-func createKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) {
-	name := fedConfig.Name
-	namespace := fedConfig.Namespace
+func applyKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) {
 	qualifiedName := util.QualifiedName{
-		Namespace: namespace,
-		Name:      name,
+		Namespace: fedConfig.Namespace,
+		Name:      fedConfig.Name,
+	}
+
+	fedConfig.TypeMeta = metav1.TypeMeta{
+		APIVersion: corev1b1.SchemeGroupVersion.String(),
+		Kind:       "KubeFedConfig",
 	}
 
 	client := genericclient.NewForConfigOrDieWithUserAgent(config, "kubefedconfig")
-	// Create the KubeFedConfig requested by the caller since no KubeFedConfig
-	// was detected so far because `--kubefed-config` was not specified and
-	// none already existed in the API.
-	err := client.Create(context.Background(), fedConfig)
+	err := client.Patch(context.Background(), fedConfig, runtimeclient.Apply,
+		runtimeclient.ForceOwnership, runtimeclient.FieldOwner("kubefed-controller-manager"))
 	if err != nil {
-		klog.Fatalf("Error creating KubeFedConfig %q: %v", qualifiedName, err)
-	}
-}
-
-func deleteKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) {
-	name := fedConfig.Name
-	namespace := fedConfig.Namespace
-	qualifiedName := util.QualifiedName{
-		Namespace: namespace,
-		Name:      name,
-	}
-
-	client := genericclient.NewForConfigOrDieWithUserAgent(config, "kubefedconfig")
-	// Delete the KubeFedConfig requested by the caller
-	err := client.Delete(context.Background(), fedConfig, namespace, name)
-	if err != nil {
-		klog.Fatalf("Error deleting KubeFedConfig %q: %v", qualifiedName, err)
+		klog.Fatalf("Error applying KubeFedConfig %q: %v", qualifiedName, err)
 	}
 }
 
 func setOptionsByKubeFedConfig(opts *options.Options) {
 	fedConfig := getKubeFedConfig(opts)
 	if fedConfig == nil {
-		// KubeFedConfig could not be sourced from --kubefed-config or from the API.
-		qualifiedName := util.QualifiedName{
-			Namespace: opts.Config.KubeFedNamespace,
-			Name:      util.KubeFedConfigName,
-		}
-
-		klog.Infof("Creating KubeFedConfig %q with default values", qualifiedName)
-
 		fedConfig = &corev1b1.KubeFedConfig{
 			ObjectMeta: metav1.ObjectMeta{
-				Name:      qualifiedName.Name,
-				Namespace: qualifiedName.Namespace,
+				Name:      util.KubeFedConfigName,
+				Namespace: opts.Config.KubeFedNamespace,
 			},
 		}
-		setDefaultKubeFedConfigScope(fedConfig)
-		createKubeFedConfig(opts.Config.KubeConfig, fedConfig)
-	} else {
-		newFedConfig := &corev1b1.KubeFedConfig{}
-		fedConfig.DeepCopyInto(newFedConfig)
-		if setDefaultKubeFedConfigScope(newFedConfig) {
-			deleteKubeFedConfig(opts.Config.KubeConfig, fedConfig)
-			createKubeFedConfig(opts.Config.KubeConfig, newFedConfig)
-		}
 	}
+	setDefaultKubeFedConfigScope(fedConfig)
+	applyKubeFedConfig(opts.Config.KubeConfig, fedConfig)
 
 	qualifedName := util.QualifiedName{
 		Name:      fedConfig.Name,
