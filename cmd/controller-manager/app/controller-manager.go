@@ -294,8 +294,14 @@ func applyKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) 
 	}
 
 	client := genericclient.NewForConfigOrDieWithUserAgent(config, "kubefedconfig")
+	// Best effort to apply the KubeFedConfig, but skip if there are field ownership conflicts.
+	// This resource is reconciled by helm, which has the ultimate ownership.
 	err := client.Patch(context.Background(), fedConfig, runtimeclient.Apply,
-		runtimeclient.ForceOwnership, runtimeclient.FieldOwner("kubefed-controller-manager"))
+		runtimeclient.FieldOwner("kubefed-controller-manager"))
+	if apierrors.IsConflict(err) {
+		klog.Infof("KubeFedConfig %q has field ownership conflicts with another manager, skipping apply: %v", qualifiedName, err)
+		return
+	}
 	if err != nil {
 		klog.Fatalf("Error applying KubeFedConfig %q: %v", qualifiedName, err)
 	}
