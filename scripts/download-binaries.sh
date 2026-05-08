@@ -42,6 +42,11 @@ dest_dir="${root_dir}/bin"
 mkdir -p "${dest_dir}"
 
 platform=$(uname -s|tr A-Z a-z)
+arch=$(uname -m)
+case "${arch}" in
+  x86_64)  arch="amd64" ;;
+  aarch64|arm64) arch="arm64" ;;
+esac
 
 kb_version="2.3.1"
 kb_tgz="kubebuilder_${kb_version}_${platform}_amd64.tar.gz"
@@ -55,21 +60,21 @@ source <(setup-envtest use -p env 1.31.x)
 echo "KUBEBUILDER_ASSETS is set to ${KUBEBUILDER_ASSETS}"
 
 helm_version="3.13.0"
-helm_tgz="helm-v${helm_version}-${platform}-amd64.tar.gz"
+helm_tgz="helm-v${helm_version}-${platform}-${arch}.tar.gz"
 helm_url="https://get.helm.sh/$helm_tgz"
 curl "${curl_args}" "${helm_url}" \
-    | tar xzP -C "${dest_dir}" --strip-components=1 "${platform}-amd64/helm"
+    | tar xzP -C "${dest_dir}" --strip-components=1 "${platform}-${arch}/helm"
 
-kubectl_version="v1.32.0"
-curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl"
+kubectl_version="v1.35.0"
+curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/${arch}/kubectl"
 (cd "${dest_dir}" && \
- echo "$(curl -L "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/amd64/kubectl.sha256")  kubectl" | \
-   sha256sum --check
+ echo "$(curl -L "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/${arch}/kubectl.sha256")  kubectl" | \
+   shasum -a 256 --check
 )
 chmod +x "${dest_dir}/kubectl"
 
 golint_version="1.64.8"
-golint_dir="golangci-lint-${golint_version}-${platform}-amd64"
+golint_dir="golangci-lint-${golint_version}-${platform}-${arch}"
 golint_tgz="${golint_dir}.tar.gz"
 golint_url="https://github.com/golangci/golangci-lint/releases/download/v${golint_version}/${golint_tgz}"
 curl "${curl_args}" "${golint_url}" \

@@ -19,7 +19,7 @@ defaults:
 jobs:
   release-please:
     runs-on:
-      - ubuntu-latest
+      - self-hosted-nutanix-medium
 
     steps:
       - uses: actions/checkout@v4
