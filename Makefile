@@ -31,6 +31,7 @@ BIN_DIR := bin
 DOCKER ?= docker
 HOST_ARCH ?= $(shell go env GOARCH)
 HOST_PLATFORM ?= $(shell uname -s | tr A-Z a-z)-$(HOST_ARCH)
+DOCKER_ARCH ?= $(shell $(DOCKER) info --format '{{.Architecture}}' 2>/dev/null | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/' || echo $(HOST_ARCH))
 
 GIT_VERSION ?= $(shell git describe --always --dirty)
 GIT_TAG ?= $(shell git describe --tags --exact-match 2>/dev/null)
@@ -95,10 +96,10 @@ build: hyperfed controller kubefedctl webhook
 lint:
 	golangci-lint run -c .golangci.yml --fix
 
-container: $(HYPERFED_TARGET)-linux-$(HOST_ARCH)
-	@tmpdir=`mktemp --tmpdir -d`; \
+container: $(HYPERFED_TARGET)-linux-$(DOCKER_ARCH)
+	@tmpdir=`mktemp -d`; \
 	trap 'rm -rf "$$tmpdir"' EXIT; \
-	cp $(HYPERFED_TARGET)-linux-$(HOST_ARCH) $$tmpdir/hyperfed; \
+	cp $(HYPERFED_TARGET)-linux-$(DOCKER_ARCH) $$tmpdir/hyperfed; \
 	cp images/kubefed/Dockerfile $$tmpdir; \
 	pushd $$tmpdir &>/dev/null; \
 	ln -s hyperfed controller-manager; \
@@ -111,7 +112,7 @@ bindir:
 	mkdir -p $(BIN_DIR)
 
 COMMANDS := $(HYPERFED_TARGET) $(CONTROLLER_TARGET) $(KUBEFEDCTL_TARGET) $(WEBHOOK_TARGET)
-PLATFORMS := linux-amd64 linux-arm64 linux-ppc64le linux-s390x darwin-amd64
+PLATFORMS := linux-amd64 linux-arm64 linux-ppc64le linux-s390x darwin-amd64 darwin-arm64
 ALL_BINS :=
 
 define PLATFORM_template

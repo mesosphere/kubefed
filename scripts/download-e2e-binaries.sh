@@ -36,9 +36,14 @@ mkdir -p "${dest_dir}"
 
 # kind
 platform="$(uname -s|tr A-Z a-z)"
-kind_version="v0.26.0"
+arch="$(uname -m)"
+case "${arch}" in
+  x86_64)  arch="amd64" ;;
+  aarch64|arm64) arch="arm64" ;;
+esac
+kind_version="v0.31.0"
 kind_path="${dest_dir}/kind"
-kind_url="https://github.com/kubernetes-sigs/kind/releases/download/${kind_version}/kind-${platform}-amd64"
+kind_url="https://github.com/kubernetes-sigs/kind/releases/download/${kind_version}/kind-${platform}-${arch}"
 curl -fLo "${kind_path}" "${kind_url}" && chmod +x "${kind_path}"
 
 # Pull the busybox image (used in tests of workload types)

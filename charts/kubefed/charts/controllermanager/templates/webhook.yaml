@@ -40,7 +40,7 @@ webhooks:
     resources:
     - federatedtypeconfigs
     - federatedtypeconfigs/status
-  failurePolicy: Fail
+  failurePolicy: Ignore
   sideEffects: None
 {{- if and .Values.global.scope (eq .Values.global.scope "Namespaced") }}
 # For namespace scoped deployments: filter admission webhook requests for
@@ -75,7 +75,7 @@ webhooks:
     resources:
     - kubefedclusters
     - kubefedclusters/status
-  failurePolicy: Fail
+  failurePolicy: Ignore
   sideEffects: None
 {{- if and .Values.global.scope (eq .Values.global.scope "Namespaced") }}
 # See comment above.
@@ -104,7 +104,7 @@ webhooks:
     - v1beta1
     resources:
     - kubefedconfigs
-  failurePolicy: Fail
+  failurePolicy: Ignore
   sideEffects: None
 {{- if and .Values.global.scope (eq .Values.global.scope "Namespaced") }}
 # See comment above.
@@ -148,7 +148,7 @@ webhooks:
     - v1beta1
     resources:
     - kubefedconfigs
-  failurePolicy: Fail
+  failurePolicy: Ignore
   sideEffects: None
 {{- if and .Values.global.scope (eq .Values.global.scope "Namespaced") }}
   namespaceSelector:
