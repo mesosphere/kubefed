@@ -288,15 +288,25 @@ func applyKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) 
 		Name:      fedConfig.Name,
 	}
 
-	fedConfig.TypeMeta = metav1.TypeMeta{
-		APIVersion: corev1b1.SchemeGroupVersion.String(),
-		Kind:       "KubeFedConfig",
+	// Build a clean desired-state object for SSA; only Name, Namespace,
+	// TypeMeta and Spec matter. Copying from the fetched object would carry
+	// server-set metadata (managedFields, resourceVersion, …) that SSA rejects.
+	applyObj := &corev1b1.KubeFedConfig{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: corev1b1.SchemeGroupVersion.String(),
+			Kind:       "KubeFedConfig",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        fedConfig.Name,
+			Namespace:   fedConfig.Namespace,
+			Labels:      fedConfig.Labels,
+			Annotations: fedConfig.Annotations,
+		},
+		Spec: fedConfig.Spec,
 	}
 
 	client := genericclient.NewForConfigOrDieWithUserAgent(config, "kubefedconfig")
-	// Best effort to apply the KubeFedConfig, but skip if there are field ownership conflicts.
-	// This resource is reconciled by helm, which has the ultimate ownership.
-	err := client.Patch(context.Background(), fedConfig, runtimeclient.Apply,
+	err := client.Patch(context.Background(), applyObj, runtimeclient.Apply,
 		runtimeclient.FieldOwner("kubefed-controller-manager"))
 	if apierrors.IsConflict(err) {
 		klog.Infof("KubeFedConfig %q has field ownership conflicts with another manager, skipping apply: %v", qualifiedName, err)
