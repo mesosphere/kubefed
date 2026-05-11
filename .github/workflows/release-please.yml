@@ -22,7 +22,7 @@ jobs:
       - self-hosted-nutanix-medium
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - uses: googleapis/release-please-action@v4
         id: release-please
