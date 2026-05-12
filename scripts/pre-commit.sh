@@ -234,8 +234,10 @@ run-namespaced-e2e-tests
 echo "Deleting namespace-scoped kubefed"
 KUBEFED_NAMESPACE=foo NAMESPACED=y DELETE_CLUSTER_RESOURCE=y ./scripts/delete-kubefed.sh
 
-echo "Running e2e upgrade test"
-run-e2e-upgrade-test
-
-echo "Deleting kubefed"
-KUBEFED_NAMESPACE=${KUBEFED_UPGRADE_TEST_NS} DELETE_CLUSTER_RESOURCE=y ./scripts/delete-kubefed.sh
+# TODO(takirala): Re-enable once upgrade test is updated to use mesosphere chart releases
+#   instead of the archived kubernetes-sigs/kubefed repo (0.9.x).
+# echo "Running e2e upgrade test"
+# run-e2e-upgrade-test
+#
+# echo "Deleting kubefed"
+# KUBEFED_NAMESPACE=${KUBEFED_UPGRADE_TEST_NS} DELETE_CLUSTER_RESOURCE=y ./scripts/delete-kubefed.sh
