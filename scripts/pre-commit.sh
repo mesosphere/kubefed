@@ -67,15 +67,14 @@ function run-e2e-tests() {
 function run-e2e-upgrade-test() {
   HOST_CLUSTER="$(kubectl config current-context)"
 
-  echo "Adding a repo to install an older kubefed version"
-  helm repo add kubefed-charts "file://${ROOT_DIR}/charts"
-  helm repo  update
-
-  # Get the previous version prior to our latest stable version
-  KUBEFED_UPGRADE_TEST_VERSION=$(helm search repo kubefed-charts/kubefed  --versions | awk '{print $2}' | head -3 | tail -1)
+  # Get the latest stable release tag to upgrade from.
+  KUBEFED_UPGRADE_TEST_VERSION=$(git tag --sort=-v:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+  KUBEFED_UPGRADE_TEST_VERSION="${KUBEFED_UPGRADE_TEST_VERSION#v}"
 
   echo "Installing an older kubefed version v${KUBEFED_UPGRADE_TEST_VERSION}"
-  helm install kubefed kubefed-charts/kubefed --namespace ${KUBEFED_UPGRADE_TEST_NS} --version=v${KUBEFED_UPGRADE_TEST_VERSION} --create-namespace --wait
+  helm repo add kubefed-charts https://raw.githubusercontent.com/mesosphere/kubefed/master/charts
+  helm repo update
+  helm install kubefed kubefed-charts/kubefed --namespace ${KUBEFED_UPGRADE_TEST_NS} --version=${KUBEFED_UPGRADE_TEST_VERSION} --create-namespace --wait
 
   deployment-image-as-expected "${KUBEFED_UPGRADE_TEST_NS}" kubefed-admission-webhook admission-webhook "ghcr.io/mesosphere/kubefed:v${KUBEFED_UPGRADE_TEST_VERSION}"
   deployment-image-as-expected "${KUBEFED_UPGRADE_TEST_NS}" kubefed-controller-manager controller-manager "ghcr.io/mesosphere/kubefed:v${KUBEFED_UPGRADE_TEST_VERSION}"
