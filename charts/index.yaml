@@ -2,6 +2,48 @@ apiVersion: v1
 entries:
   kubefed:
   - apiVersion: v2
+    created: "2026-05-15T23:21:44.063399-07:00"
+    dependencies:
+    - condition: controllermanager.enabled
+      name: controllermanager
+      repository: https://localhost/
+      version: 0.11.2
+    description: KubeFed helm chart
+    digest: d3ef6006378f75527ee661e81042cab961efe6d8a27957d92935e98397ab9610
+    kubeVersion: '>= 1.16.0-0'
+    name: kubefed
+    urls:
+    - https://github.com/mesosphere/kubefed/releases/download/v0.11.2/kubefed-0.11.2.tgz
+    version: 0.11.2
+  - apiVersion: v2
+    created: "2026-05-15T23:22:40.572802-07:00"
+    dependencies:
+    - condition: controllermanager.enabled
+      name: controllermanager
+      repository: https://localhost/
+      version: 0.11.1
+    description: KubeFed helm chart
+    digest: 5e434b02947ad579babc1c292897abe4166dc1e7818aa4f9297dbf33088e17e0
+    kubeVersion: '>= 1.16.0-0'
+    name: kubefed
+    urls:
+    - https://github.com/mesosphere/kubefed/releases/download/v0.11.1/kubefed-0.11.1.tgz
+    version: 0.11.1
+  - apiVersion: v2
+    created: "2026-05-15T23:22:40.563018-07:00"
+    dependencies:
+    - condition: controllermanager.enabled
+      name: controllermanager
+      repository: https://localhost/
+      version: 0.11.0
+    description: KubeFed helm chart
+    digest: 91cc8aed0439435548020150db9130657d7f870c547d5ed79179ac7df42adb8b
+    kubeVersion: '>= 1.16.0-0'
+    name: kubefed
+    urls:
+    - https://github.com/mesosphere/kubefed/releases/download/v0.11.0/kubefed-0.11.0.tgz
+    version: 0.11.0
+  - apiVersion: v2
     created: "2023-12-21T17:52:41.724369Z"
     dependencies:
     - condition: controllermanager.enabled
@@ -309,4 +351,4 @@ entries:
     urls:
     - https://github.com/kubernetes-sigs/kubefed/releases/download/v0.1.0-rc1/kubefed-0.1.0-rc1.tgz
     version: 0.1.0-rc1
-generated: "2023-12-21T17:52:41.722649Z"
+generated: "2026-05-15T23:22:40.557921-07:00"
