@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.11.3 (2026-05-18)
+
+## What's Changed
+* build(deps): bump the all-go-mod-patch-and-minor group across 1 directory with 13 updates by @dependabot[bot] in https://github.com/mesosphere/kubefed/pull/41
+* build(deps): bump sigs.k8s.io/controller-tools from 0.17.1 to 0.17.2 in /tools in the all-go-mod-patch-and-minor group by @dependabot[bot] in https://github.com/mesosphere/kubefed/pull/39
+* build(deps): bump the all-go-mod-patch-and-minor group across 1 directory with 13 updates by @dependabot[bot] in https://github.com/mesosphere/kubefed/pull/48
+* fix: upgrade Kind to v0.31.0 and node image to v1.35.0 by @takirala in https://github.com/mesosphere/kubefed/pull/60
+* fix: use server-side apply for KubeFedConfig to prevent race with Helm by @takirala in https://github.com/mesosphere/kubefed/pull/59
+* chore: add v0.11.0, v0.11.1, v0.11.2 helm charts to repo index by @takirala in https://github.com/mesosphere/kubefed/pull/61
+* fix: apply KubeFedConfig defaults inline before SSA apply by @takirala in https://github.com/mesosphere/kubefed/pull/63
+
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.11.1...v0.11.3
+
 ## 0.11.1 (2025-01-23)
 
 ## What's Changed
