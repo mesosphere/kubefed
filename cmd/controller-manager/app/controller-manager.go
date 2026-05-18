@@ -46,6 +46,7 @@ import (
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/leaderelection"
 	"sigs.k8s.io/kubefed/cmd/controller-manager/app/options"
 	corev1b1 "sigs.k8s.io/kubefed/pkg/apis/core/v1beta1"
+	"sigs.k8s.io/kubefed/pkg/apis/core/v1beta1/defaults"
 	"sigs.k8s.io/kubefed/pkg/apis/core/v1beta1/validation"
 	genericclient "sigs.k8s.io/kubefed/pkg/client/generic"
 	"sigs.k8s.io/kubefed/pkg/controller/federatedtypeconfig"
@@ -327,6 +328,7 @@ func setOptionsByKubeFedConfig(opts *options.Options) {
 			},
 		}
 	}
+	defaults.SetDefaultKubeFedConfig(fedConfig)
 	setDefaultKubeFedConfigScope(fedConfig)
 	applyKubeFedConfig(opts.Config.KubeConfig, fedConfig)
 

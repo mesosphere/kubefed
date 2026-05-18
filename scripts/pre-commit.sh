@@ -72,7 +72,7 @@ function run-e2e-upgrade-test() {
   KUBEFED_UPGRADE_TEST_VERSION="${KUBEFED_UPGRADE_TEST_VERSION#v}"
 
   echo "Installing an older kubefed version v${KUBEFED_UPGRADE_TEST_VERSION}"
-  helm repo add kubefed-charts https://raw.githubusercontent.com/mesosphere/kubefed/main/charts
+  helm repo add kubefed-charts https://raw.githubusercontent.com/mesosphere/kubefed/master/charts
   helm repo update
   helm install kubefed kubefed-charts/kubefed --namespace ${KUBEFED_UPGRADE_TEST_NS} --version=${KUBEFED_UPGRADE_TEST_VERSION} --create-namespace --wait
 
