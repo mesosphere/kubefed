@@ -141,7 +141,19 @@ fi
 # Use KIND_LOAD_IMAGE=y ./scripts/deploy-kubefed.sh <image> to load
 # the built docker image into kind before deploying.
 if [[ "${KIND_LOAD_IMAGE:-}" == "y" ]]; then
-    kind load docker-image "${IMAGE_NAME}" --name="${KIND_CLUSTER_NAME:-kind}"
+    # Use docker save + direct ctr import to avoid containerd snapshotter detection issues
+    # This bypasses kind's image loading which fails in some CI environments
+    KIND_CLUSTER_NAME="${KIND_CLUSTER_NAME:-kind}"
+    image_archive="/tmp/$(echo "${IMAGE_NAME}" | tr '/:' '_').tar"
+    
+    echo "Saving image ${IMAGE_NAME} to ${image_archive}..."
+    docker save "${IMAGE_NAME}" -o "${image_archive}"
+    
+    echo "Loading image into kind cluster ${KIND_CLUSTER_NAME} via ctr..."
+    docker exec -i "${KIND_CLUSTER_NAME}-control-plane" ctr -n k8s.io images import - < "${image_archive}"
+    
+    rm -f "${image_archive}"
+    echo "Image ${IMAGE_NAME} loaded successfully"
 fi
 
 cd "$(dirname "$0")/.."

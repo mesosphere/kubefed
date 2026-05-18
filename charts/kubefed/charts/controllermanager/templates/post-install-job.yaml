@@ -13,11 +13,61 @@ data:
     #!/bin/bash
     set -euo pipefail
 
-    kubectl patch kubefedconfig -n {{ .Release.Namespace }} kubefed --type='json' -p='[{"op": "add", "path": "/spec/featureGates", "value":[{"configuration": {{ .Values.featureGates.PushReconciler | default "Enabled" | quote }},"name":"PushReconciler"},{"configuration": {{ .Values.featureGates.RawResourceStatusCollection | default "Disabled" | quote }},"name":"RawResourceStatusCollection"},{"configuration": {{ .Values.featureGates.SchedulerPreferences | default "Enabled" | quote }},"name":"SchedulerPreferences"}]}]'
+    NAMESPACE="{{ .Release.Namespace }}"
+    MAX_RETRIES=30
+    RETRY_INTERVAL=10
 
-    echo "Kubefedconfig patched successfully!"
+    echo "Waiting for kubefedconfig resource to be available..."
+    
+    # Wait for kubefedconfig to exist
+    for i in $(seq 1 $MAX_RETRIES); do
+      if kubectl get kubefedconfig -n "$NAMESPACE" kubefed &>/dev/null; then
+        echo "kubefedconfig found!"
+        break
+      fi
+      if [ $i -eq $MAX_RETRIES ]; then
+        echo "ERROR: Timed out waiting for kubefedconfig to exist"
+        exit 1
+      fi
+      echo "Waiting for kubefedconfig... (attempt $i/$MAX_RETRIES)"
+      sleep $RETRY_INTERVAL
+    done
 
-    kubectl rollout restart deployment/kubefed-controller-manager -n {{ .Release.Namespace }}
+    # Wait for controller-manager deployment to exist
+    echo "Waiting for kubefed-controller-manager deployment to be available..."
+    for i in $(seq 1 $MAX_RETRIES); do
+      if kubectl get deployment kubefed-controller-manager -n "$NAMESPACE" &>/dev/null; then
+        echo "kubefed-controller-manager deployment found!"
+        break
+      fi
+      if [ $i -eq $MAX_RETRIES ]; then
+        echo "ERROR: Timed out waiting for kubefed-controller-manager deployment to exist"
+        exit 1
+      fi
+      echo "Waiting for deployment... (attempt $i/$MAX_RETRIES)"
+      sleep $RETRY_INTERVAL
+    done
+
+    # Patch kubefedconfig with retries
+    echo "Patching kubefedconfig..."
+    for i in $(seq 1 5); do
+      if kubectl patch kubefedconfig -n "$NAMESPACE" kubefed --type='json' -p='[{"op": "add", "path": "/spec/featureGates", "value":[{"configuration": {{ .Values.featureGates.PushReconciler | default "Enabled" | quote }},"name":"PushReconciler"},{"configuration": {{ .Values.featureGates.RawResourceStatusCollection | default "Disabled" | quote }},"name":"RawResourceStatusCollection"},{"configuration": {{ .Values.featureGates.SchedulerPreferences | default "Enabled" | quote }},"name":"SchedulerPreferences"}]}]'; then
+        echo "Kubefedconfig patched successfully!"
+        break
+      fi
+      if [ $i -eq 5 ]; then
+        echo "ERROR: Failed to patch kubefedconfig after 5 attempts"
+        exit 1
+      fi
+      echo "Patch failed, retrying... (attempt $i/5)"
+      sleep 5
+    done
+
+    # Restart controller-manager deployment
+    echo "Restarting kubefed-controller-manager..."
+    kubectl rollout restart deployment/kubefed-controller-manager -n "$NAMESPACE"
+    
+    echo "Post-install hook completed successfully!"
 ---
 apiVersion: batch/v1
 kind: Job
