@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.0 (2026-05-20)
+
+## What's Changed
+* chore: update v0.11.3 helm chart index and image tags by @takirala in https://github.com/mesosphere/kubefed/pull/66
+* fix: default KubeFedConfig scope to Cluster when empty by @takirala in https://github.com/mesosphere/kubefed/pull/67
+
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.11.3...v0.12.0
+
 ## 0.11.3 (2026-05-18)
 
 ## What's Changed
