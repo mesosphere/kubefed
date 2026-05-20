@@ -253,13 +253,11 @@ func getKubeFedConfig(opts *options.Options) *corev1b1.KubeFedConfig {
 }
 
 func setDefaultKubeFedConfigScope(fedConfig *corev1b1.KubeFedConfig) bool {
-	// TODO(sohankunkerkar) Remove when no longer necessary.
-	// This Environment variable is a temporary addition to support Red Hat's downstream testing efforts.
-	// Its continued existence should not be relied upon.
 	const defaultScopeEnv = "DEFAULT_KUBEFED_SCOPE"
 	defaultScope := os.Getenv(defaultScopeEnv)
 	if len(defaultScope) == 0 {
-		return false
+		// This is consistent with the defaulting logic in the KubeFedConfig CR in helm chart.
+		defaultScope = string(apiextv1.ClusterScoped)
 	}
 
 	if defaultScope != string(apiextv1.ClusterScoped) && defaultScope != string(apiextv1.NamespaceScoped) {
@@ -321,15 +319,17 @@ func applyKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) 
 func setOptionsByKubeFedConfig(opts *options.Options) {
 	fedConfig := getKubeFedConfig(opts)
 	if fedConfig == nil {
+		// If the KubeFedConfig is not found, create a new one with the default values.
+		// If the KubeFedConfig is found, then either an old controller manager created it or it was created by the helm chart itself in which case we can use it as is.
 		fedConfig = &corev1b1.KubeFedConfig{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      util.KubeFedConfigName,
 				Namespace: opts.Config.KubeFedNamespace,
 			},
 		}
+		defaults.SetDefaultKubeFedConfig(fedConfig)
+		setDefaultKubeFedConfigScope(fedConfig)
 	}
-	defaults.SetDefaultKubeFedConfig(fedConfig)
-	setDefaultKubeFedConfigScope(fedConfig)
 	applyKubeFedConfig(opts.Config.KubeConfig, fedConfig)
 
 	qualifedName := util.QualifiedName{
