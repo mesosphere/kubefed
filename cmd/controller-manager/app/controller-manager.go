@@ -35,11 +35,9 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/yaml"
 	utilfeature "k8s.io/apiserver/pkg/util/feature"
-	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 	"k8s.io/component-base/logs"
 	"k8s.io/klog/v2"
-	runtimeclient "sigs.k8s.io/controller-runtime/pkg/client"
 	_ "sigs.k8s.io/controller-runtime/pkg/metrics" // for workqueue metrics registration
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 
@@ -281,46 +279,15 @@ func setDefaultKubeFedConfigScope(fedConfig *corev1b1.KubeFedConfig) bool {
 	return false
 }
 
-func applyKubeFedConfig(config *rest.Config, fedConfig *corev1b1.KubeFedConfig) {
-	qualifiedName := util.QualifiedName{
-		Namespace: fedConfig.Namespace,
-		Name:      fedConfig.Name,
-	}
-
-	// Build a clean desired-state object for SSA; only Name, Namespace,
-	// TypeMeta and Spec matter. Copying from the fetched object would carry
-	// server-set metadata (managedFields, resourceVersion, …) that SSA rejects.
-	applyObj := &corev1b1.KubeFedConfig{
-		TypeMeta: metav1.TypeMeta{
-			APIVersion: corev1b1.SchemeGroupVersion.String(),
-			Kind:       "KubeFedConfig",
-		},
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        fedConfig.Name,
-			Namespace:   fedConfig.Namespace,
-			Labels:      fedConfig.Labels,
-			Annotations: fedConfig.Annotations,
-		},
-		Spec: fedConfig.Spec,
-	}
-
-	client := genericclient.NewForConfigOrDieWithUserAgent(config, "kubefedconfig")
-	err := client.Patch(context.Background(), applyObj, runtimeclient.Apply,
-		runtimeclient.FieldOwner("kubefed-controller-manager"))
-	if apierrors.IsConflict(err) {
-		klog.Infof("KubeFedConfig %q has field ownership conflicts with another manager, skipping apply: %v", qualifiedName, err)
-		return
-	}
-	if err != nil {
-		klog.Fatalf("Error applying KubeFedConfig %q: %v", qualifiedName, err)
-	}
-}
-
 func setOptionsByKubeFedConfig(opts *options.Options) {
 	fedConfig := getKubeFedConfig(opts)
 	if fedConfig == nil {
-		// If the KubeFedConfig is not found, create a new one with the default values.
-		// If the KubeFedConfig is found, then either an old controller manager created it or it was created by the helm chart itself in which case we can use it as is.
+		// KubeFedConfig not found on the cluster yet. The Helm chart is the
+		// sole owner of this CR -- do NOT create it here. Writing it from the
+		// controller-manager races with Helm SSA and triggers a Helm v4 bug
+		// ("original object KubeFedConfig not found") that fails the install.
+		// Use in-memory defaults instead; the chart-managed CR will be picked
+		// up on the next restart once the install succeeds.
 		fedConfig = &corev1b1.KubeFedConfig{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      util.KubeFedConfigName,
@@ -330,7 +297,6 @@ func setOptionsByKubeFedConfig(opts *options.Options) {
 		defaults.SetDefaultKubeFedConfig(fedConfig)
 		setDefaultKubeFedConfigScope(fedConfig)
 	}
-	applyKubeFedConfig(opts.Config.KubeConfig, fedConfig)
 
 	qualifedName := util.QualifiedName{
 		Name:      fedConfig.Name,
