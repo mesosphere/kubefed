@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.12.1 (2026-05-26)
+
+## What's Changed
+* chore: add v0.11.4 chart to repo index by @takirala in https://github.com/mesosphere/kubefed/pull/69
+* fix: stop controller-manager from creating KubeFedConfig CR by @takirala in https://github.com/mesosphere/kubefed/pull/70
+
+
+**Full Changelog**: https://github.com/mesosphere/kubefed/compare/v0.12.0...v0.12.1
+
 ## 0.12.0 (2026-05-20)
 
 ## What's Changed
