@@ -25,10 +25,3 @@ linters:
 linters-settings:
   goimports:
     local-prefixes: sigs.k8s.io/kubefed
-
-issues:
-  exclude-rules:
-  - path: pkg/apis/.*/groupversion_info\.go
-    linters:
-    - staticcheck
-    text: "SA1019"

@@ -163,7 +163,7 @@ echo "Checking boilerplate text"
 ./third-party/k8s.io/repo-infra/hack/verify_boilerplate.py --rootdir="${ROOT_DIR}"
 
 echo "Linting"
-golangci-lint run -c .golangci.yml
+golangci-lint run -c .golangci.yml --fix
 check-git-state
 
 echo "Checking that correct Error Package is used."

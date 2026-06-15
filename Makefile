@@ -54,7 +54,7 @@ endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
 # .github/workflows files.
-BUILD_IMAGE ?= golang:1.26.4
+BUILD_IMAGE ?= golang:1.24.3
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
@@ -88,7 +88,7 @@ all: container hyperfed controller kubefedctl webhook e2e
 # Unit tests
 test:
 	go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-	source <(setup-envtest use -p env 1.36.x) && \
+	source <(setup-envtest use -p env 1.31.x) && \
 		go test $(TEST_PKGS)
 
 build: hyperfed controller kubefedctl webhook
@@ -150,10 +150,12 @@ e2e: $(E2E_BINARY_TARGET)
 # Generate code
 generate-code: controller-gen
 	controller-gen object:headerFile=./hack/boilerplate.go.txt paths="./..."
+	go fix ./...
 
 generate: generate-code kubefedctl
 	./scripts/sync-up-helm-chart.sh
 	./scripts/update-bindata.sh
+	go fix ./...
 
 push: container
 	$(DOCKER) push $(IMAGE):$(GIT_VERSION)

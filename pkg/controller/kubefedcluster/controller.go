@@ -261,7 +261,7 @@ func (cc *ClusterController) updateIndividualClusterStatus(cluster *fedv1b1.Kube
 }
 
 func (cc *ClusterController) RecordError(cluster runtimeclient.Object, errorCode string, err error) {
-	cc.eventRecorder.Eventf(cluster, corev1.EventTypeWarning, errorCode, "%v", err)
+	cc.eventRecorder.Eventf(cluster, corev1.EventTypeWarning, errorCode, err.Error())
 }
 
 func thresholdAdjustedClusterStatus(clusterStatus *fedv1b1.KubeFedClusterStatus, storedData *ClusterData,

@@ -17,9 +17,8 @@
 set -eou pipefail
 
 GIT_COMMIT_SHA=${GITHUB_SHA:-$(git rev-parse HEAD)}
-BASE_REF=${GITHUB_BASE_REF:-main}
 
-CHANGED_FILES=$(git diff --name-only "origin/${BASE_REF}"..."${GIT_COMMIT_SHA}")
+CHANGED_FILES=$(git diff --name-only master..."${GIT_COMMIT_SHA}")
 
 [[ -z $CHANGED_FILES ]] && exit 1
 
