@@ -30,9 +30,8 @@ var (
 	// SchemeGroupVersion is group version used to register these objects
 	SchemeGroupVersion = schema.GroupVersion{Group: "scheduling.kubefed.io", Version: "v1alpha1"}
 
-	// SchemeBuilder is used to add go types to the GroupVersionKind scheme
-	//lint:ignore SA1019 controller-runtime's Builder remains required for object registration in this package.
-	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion}
+	// SchemeBuilder is used to add go types to the GroupVersionKind scheme.
+	SchemeBuilder = &scheme.Builder{GroupVersion: SchemeGroupVersion} //nolint:staticcheck // SA1019: required for existing SchemeBuilder.Register(...) usage.
 
 	// AddToScheme is required by pkg/client/...
 	AddToScheme = SchemeBuilder.AddToScheme
