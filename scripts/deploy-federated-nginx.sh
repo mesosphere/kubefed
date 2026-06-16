@@ -57,11 +57,21 @@ util::wait-for-condition 'federated deployment status updated in cluster2' \
     "(kubectl get federateddeployment nginx -n ${TEST_NS} -o jsonpath='{.status.clusters[*].name}' | grep '\<cluster2\>') &> /dev/null" 120
 
 echo
-echo "Checking nginx deployment readiness in member clusters."
-util::wait-for-condition 'nginx deployment available in cluster1' \
-    "kubectl get deployment nginx -n ${TEST_NS} --context cluster1 -o jsonpath='{.status.availableReplicas}' | grep -E '^[1-9][0-9]*$' &> /dev/null" 120
-util::wait-for-condition 'nginx deployment available in cluster2' \
-    "kubectl get deployment nginx -n ${TEST_NS} --context cluster2 -o jsonpath='{.status.availableReplicas}' | grep -E '^[1-9][0-9]*$' &> /dev/null" 120
+echo "Querying web server of deployment nginx application from member clusters."
+IP1=$(kubectl get node -o jsonpath="{.items[0].status.addresses[0].address}" --context cluster1)
+IP2=$(kubectl get node -o jsonpath="{.items[0].status.addresses[0].address}" --context cluster2)
+
+util::wait-for-condition 'nodePort ok in cluster1' \
+    "kubectl --namespace ${TEST_NS} --context cluster1 get service -o jsonpath='{.items[0].spec.ports[0].nodePort}' &> /dev/null" 30
+util::wait-for-condition 'nodePort ok in cluster2' \
+    "kubectl --namespace ${TEST_NS} --context cluster2 get service -o jsonpath='{.items[0].spec.ports[0].nodePort}' &> /dev/null" 30
+PORT1=$(kubectl get service -n ${TEST_NS} --context cluster1 -o jsonpath="{.items[0].spec.ports[0].nodePort}")
+PORT2=$(kubectl get service -n ${TEST_NS} --context cluster2 -o jsonpath="{.items[0].spec.ports[0].nodePort}")
+
+util::wait-for-condition 'nginx web server ok in cluster1' "curl ${IP1}:${PORT1} &> /dev/null" 120
+util::wait-for-condition 'nginx web server ok in cluster2' "curl ${IP2}:${PORT2} &> /dev/null" 120
+echo "cluster1: $(curl -s ${IP1}:${PORT1})"
+echo "cluster2: $(curl -s ${IP2}:${PORT2})"
 
 
 # Modify federated resources to update kubernetes resources in member clusters
@@ -70,13 +80,11 @@ echo "Changing index.html in federated configmap."
 kubectl patch federatedconfigmap web-file -n ${TEST_NS} --type=merge -p '{"spec": {"template": {"data": {"index.html": "Hello from KubeFed!"}}}}'
 
 echo
-echo "Checking updated configmap content in member clusters."
-util::wait-for-condition 'web content changed in cluster1' \
-    "(kubectl get configmap web-file -n ${TEST_NS} --context cluster1 -o jsonpath='{.data.index\.html}' | grep '^Hello from KubeFed!$') &> /dev/null" 120
-util::wait-for-condition 'web content changed in cluster2' \
-    "(kubectl get configmap web-file -n ${TEST_NS} --context cluster2 -o jsonpath='{.data.index\.html}' | grep '^Hello from KubeFed!$') &> /dev/null" 120
-echo "cluster1: $(kubectl get configmap web-file -n ${TEST_NS} --context cluster1 -o jsonpath='{.data.index\.html}')"
-echo "cluster2: $(kubectl get configmap web-file -n ${TEST_NS} --context cluster2 -o jsonpath='{.data.index\.html}')"
+echo "Querying web server of deployed nginx application from member clusters."
+util::wait-for-condition 'web content changed in cluster1' "(curl ${IP1}:${PORT1} | grep '^Hello from KubeFed') &> /dev/null" 120
+util::wait-for-condition 'web content changed in cluster2' "(curl ${IP2}:${PORT2} | grep '^Hello from KubeFed') &> /dev/null" 120
+echo "cluster1: $(curl -s ${IP1}:${PORT1})"
+echo "cluster2: $(curl -s ${IP2}:${PORT2})"
 
 echo
 echo "Updating override of federated deployment nginx to increase 'replicas' to 2 in cluster2."
