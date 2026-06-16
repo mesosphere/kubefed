@@ -17,8 +17,28 @@
 set -eou pipefail
 
 GIT_COMMIT_SHA=${GITHUB_SHA:-$(git rev-parse HEAD)}
+BASE_BRANCH=${GITHUB_BASE_REF:-}
 
-CHANGED_FILES=$(git diff --name-only master..."${GIT_COMMIT_SHA}")
+if [[ -z "${BASE_BRANCH}" ]]; then
+  if git rev-parse --verify --quiet origin/main >/dev/null; then
+    BASE_BRANCH="origin/main"
+  elif git rev-parse --verify --quiet main >/dev/null; then
+    BASE_BRANCH="main"
+  elif git rev-parse --verify --quiet origin/master >/dev/null; then
+    BASE_BRANCH="origin/master"
+  elif git rev-parse --verify --quiet master >/dev/null; then
+    BASE_BRANCH="master"
+  else
+    echo "Unable to determine base branch for doc diff check"
+    exit 1
+  fi
+else
+  if git rev-parse --verify --quiet "origin/${BASE_BRANCH}" >/dev/null; then
+    BASE_BRANCH="origin/${BASE_BRANCH}"
+  fi
+fi
+
+CHANGED_FILES=$(git diff --name-only "${BASE_BRANCH}"..."${GIT_COMMIT_SHA}")
 
 [[ -z $CHANGED_FILES ]] && exit 1
 
