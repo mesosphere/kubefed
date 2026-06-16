@@ -53,8 +53,8 @@ VERBOSE_FLAG = -v
 endif
 BUILDMNT = /go/src/$(GOTARGET)
 # The version here should match the version of go configured in
-# .github/workflows files.
-BUILD_IMAGE ?= golang:1.24.3
+# .github/workflows files and go.mod.
+BUILD_IMAGE ?= golang:1.26.0
 
 HYPERFED_TARGET = bin/hyperfed
 CONTROLLER_TARGET = bin/controller-manager
