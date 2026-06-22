@@ -75,7 +75,8 @@ chmod +x "${dest_dir}/kubectl"
 
 # Build golangci-lint with the current Go toolchain to avoid
 # version skew with the project's configured Go version.
-GOBIN="${dest_dir}" go install github.com/golangci/golangci-lint/cmd/golangci-lint@latest
+golangci_lint_version="v1.64.8"
+GOBIN="${dest_dir}" go install github.com/golangci/golangci-lint/cmd/golangci-lint@"${golangci_lint_version}"
 
 # Install go-bindata tool
 pushd ${root_dir}/tools
