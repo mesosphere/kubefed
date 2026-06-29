@@ -233,7 +233,7 @@ func (r *federatedResource) ApplyOverrides(obj *unstructured.Unstructured, clust
 
 // TODO(marun) Use an enumeration for errorCode.
 func (r *federatedResource) RecordError(errorCode string, err error) {
-	r.eventRecorder.Eventf(r.Object(), corev1.EventTypeWarning, errorCode, err.Error())
+	r.eventRecorder.Eventf(r.Object(), corev1.EventTypeWarning, errorCode, "%v", err)
 }
 
 func (r *federatedResource) RecordEvent(reason, messageFmt string, args ...interface{}) {

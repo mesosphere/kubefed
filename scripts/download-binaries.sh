@@ -73,12 +73,10 @@ curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin
 )
 chmod +x "${dest_dir}/kubectl"
 
-golint_version="1.64.8"
-golint_dir="golangci-lint-${golint_version}-${platform}-${arch}"
-golint_tgz="${golint_dir}.tar.gz"
-golint_url="https://github.com/golangci/golangci-lint/releases/download/v${golint_version}/${golint_tgz}"
-curl "${curl_args}" "${golint_url}" \
-    | tar xzP -C "${dest_dir}" --strip-components=1 "${golint_dir}/golangci-lint"
+# Build golangci-lint with the current Go toolchain to avoid
+# version skew with the project's configured Go version.
+golangci_lint_version="v1.64.8"
+GOBIN="${dest_dir}" go install github.com/golangci/golangci-lint/cmd/golangci-lint@"${golangci_lint_version}"
 
 # Install go-bindata tool
 pushd ${root_dir}/tools
