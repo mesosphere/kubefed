@@ -55,7 +55,7 @@ curl "${curl_args}" "${kb_url}" \
   | tar xzP -C "${dest_dir}" --strip-components=2
 
 go install sigs.k8s.io/controller-runtime/tools/setup-envtest@latest
-source <(setup-envtest use -p env 1.31.x)
+source <(setup-envtest use -p env 1.37.x)
 
 echo "KUBEBUILDER_ASSETS is set to ${KUBEBUILDER_ASSETS}"
 
@@ -65,7 +65,7 @@ helm_url="https://get.helm.sh/$helm_tgz"
 curl "${curl_args}" "${helm_url}" \
     | tar xzP -C "${dest_dir}" --strip-components=1 "${platform}-${arch}/helm"
 
-kubectl_version="v1.35.0"
+kubectl_version="v1.37.0"
 curl -Lo "${dest_dir}/kubectl" "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/${arch}/kubectl"
 (cd "${dest_dir}" && \
  echo "$(curl -L "https://dl.k8s.io/release/${kubectl_version}/bin/${platform}/${arch}/kubectl.sha256")  kubectl" | \
